@@ -7,8 +7,7 @@
 * 最小侵入性编程和基于POJO的轻量级
   * 侵入式：类不需要强制实现框架接口和继承框架父类
   * POJO：Plain Old Java Object，简单老式Java对象，即简单普通Java类。
-  *
-```
+  * ```
  public class HelloWorldBean {
     public String sayHello(){
      return "Hello World";
