@@ -115,8 +115,8 @@ public class ConcreteService implements AbstractService{
  ```
 
 * 通过切面和模板减少样板式代码
- * 模板:通用代码
- * 样板式代码:需重复使用代码
+  * 模板:通用代码
+  * 样板式代码:需重复使用代码
 
 #### 1.2. 框架核心-容器
 
