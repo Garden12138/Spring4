@@ -149,4 +149,8 @@ public class ConcreteService implements AbstractService{
 
 #### 1.3. Spring生态系统
 
+* [Spring由多个模块组成](http://blog.csdn.net/li_qinging/article/details/72824478)
+
 #### 1.4. Spring4新功能
+
+* [新特性](http://www.mamicode.com/info-detail-2002429.html)
