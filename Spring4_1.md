@@ -119,6 +119,34 @@ public class ConcreteService implements AbstractService{
 
 #### 1.2. 框架核心-容器
 
+* 职责：负责创建，装配，配置并管理对象。
+* 类型：bean工厂（提供基本的DI操作，较少使用）和应用上下文（提供应用级别服务，使用广泛）。
+* 了解bean
+  * [生命周期](http://blog.csdn.net/lisongjia123/article/details/52091013)
+
+* 了解应用上下文
+  * AnnotationConfigApplicationContext：基于Java配置类加载Spring应用上下文。
+  ```
+  ApplicationContext contetx = new AnnotationConfigApplicationContext(com.web.spring4.service.ConcreteService.class);
+  ```
+  * AnnotationConfigWebApplicationContext：基于Java配置类加载Spring Web应用上下文。
+  ```
+  ApplicationContext contetx = new AnnotationConfigWebApplicationContext(com.web.spring4.service.ConcreteService.class);
+  ```
+  * XmlWebApplicationContext：基于XML配置从WEB应用路径加载应用上下文。
+  ```
+  ServletContext servletContext = request.getSession().getServletContext();
+    ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext );
+  ```
+  * ClassPathXmlApplicationContext：基于XML配置从类路径加载应用上下文。
+  ```
+  ApplicationContext contetx = new ClassPathXmlApplicationContext("config.xml");  /**src目录下**/
+  ```
+  * FileSystemXmlApplicationContext:基于XML配置从文件系统路径加载应用上下文。
+  ```
+  ApplicationContext contetx = new FileSystemXmlApplicationContext("c:/config.xml");
+  ```
+
 #### 1.3. Spring生态系统
 
 #### 1.4. Spring4新功能
