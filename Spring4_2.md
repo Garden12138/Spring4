@@ -118,6 +118,7 @@
       <context:component-scan base-package="com.web.spring4.bean.impl" />      
 </beans>
   ```
+  
   * 测试器
 
   ```
