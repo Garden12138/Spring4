@@ -19,7 +19,7 @@
   package com.web.spring4.bean;
   public interface CompactDisc {
     public void play();
-}
+  }
   ```
 
   ```
