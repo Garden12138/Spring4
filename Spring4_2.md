@@ -318,9 +318,80 @@ public class CDPlayerConfig2 {
 #### 导入与混合配置
 
 * JavaConfig引用JavaConfig
+  * 使用@Import将依赖的JavaConfig导入
+
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  import com.web.spring4.bean.CompactDisc;
+  import com.web.spring4.bean.impl.JayChouAlbum;
+  @Configuration
+  public class CDConfig {
+    @Bean
+    public  CompactDisc jayChouAlbum(){
+      return new JayChouAlbum();
+	}
+  ```
+
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  import com.web.spring4.bean.CompactDisc;
+  import com.web.spring4.bean.MediaPlayer;
+  import com.web.spring4.bean.impl.*;
+  @Configuration
+  @Import(CDConfig.class)
+  public class CDPlayerConfig2 {
+    @Bean
+    public CDPlayer cDPlayer(CompactDisc compactDisc){
+      return new CDPlayer(compactDisc);
+    }
+  }
+  ```
+
+  * 建议创建新的配置类组合具有依赖关系的配置类
+
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  import org.springframework.context.annotation.ImportResource;
+  @Configuration
+  //@Import({CDConfig.class,CDPlayerConfig2.class})
+  public class SoudSystemConfig {
+
+  }
+  ```
 
 * JavaConfig引用XML
+  * 使用ImportResource将依赖的XML导入
+
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  import org.springframework.context.annotation.ImportResource;
+  @Configuration
+  @Import(CDPlayerConfig2.class)
+  @ImportResource("classpath:config.xml")
+  public class SoudSystemConfig {
+
+  }
+  ```
 
 * XML引用XML
+  * 使用标签< import resource="" >将依赖的XML导入
+
+  ```
+  <import resource="config.xml"/>
+  ```
 
 * XML引用JavaConfig
+  * 使用标签< bean class="" >将依赖的JavaConfig导入
+
+  ```
+  <bean class="com.web.spring4.config.CDConfig"/>
+  ```
