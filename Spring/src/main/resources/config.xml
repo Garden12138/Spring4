@@ -110,9 +110,20 @@
      -->
      
      <!-- 借助<util:list id = "" ></util:list>装配集合，列表声明到单独的bean -->
+     <!--  
      <util:list id = "JayChouAlbum4_2_songs">
          <value>等你下课</value>
      </util:list>
      <bean id = "JayChouAlbum4_2" class = "com.web.spring4.bean.impl.JayChouAlbum4"
-           p:songs-ref = "JayChouAlbum4_2_songs" p:artist = "周杰伦" />      
-     </beans>
+           p:songs-ref = "JayChouAlbum4_2_songs" p:artist = "周杰伦" />
+     -->
+     
+     <!-- 
+     xml引用xml  
+     <import resource="config.xml"/>
+     xml引用Java
+     <bean class="com.web.spring4.config.CDConfig"/>
+     <bean id = "CDPlayer" class = "com.web.spring4.bean.impl.CDPlayer" 
+            c:compactDisc-ref = "JayChouAlbum"/> 
+      -->    
+</beans>
