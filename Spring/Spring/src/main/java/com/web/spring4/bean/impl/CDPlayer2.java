@@ -1,5 +1,7 @@
 package com.web.spring4.bean.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,38 +9,30 @@ import org.springframework.stereotype.Component;
 
 import com.web.spring4.bean.CompactDisc;
 import com.web.spring4.bean.MediaPlayer;
+
 /**
  * 播放器实现类-CD播放器
- * @author Garden
- * 2018年3月5日
+ * 
+ * @author Garden 2018年3月5日
  */
 @Component
-public class CDPlayer implements MediaPlayer{
+public class CDPlayer2 implements MediaPlayer {
 
-//	@Resource
-	private CompactDisc cd1;
-	
-//	@Autowired /*@Resource不可用于构造函数*/
-	public CDPlayer(CompactDisc compactDisc) {
-		super();
-		this.cd1 = compactDisc;
-	}
-	
+	private List<CompactDisc> cds;
 
-	public CDPlayer() {
+	public CDPlayer2() {
 		super();
 	}
 
-
-//	@Resource /*setter构造必需含有空构造函数*/
-	public void setCd1(CompactDisc cd1) {
-		this.cd1 = cd1;
+	public CDPlayer2(List<CompactDisc> cds) {
+		super();
+		this.cds = cds;
 	}
 
 	@Override
 	public void play() {
 		// TODO Auto-generated method stub
-		cd1.play();
+		cds.get(0).play();
 	}
 
 }

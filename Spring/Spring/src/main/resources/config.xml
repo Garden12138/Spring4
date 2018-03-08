@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx" 
+    xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+      http://www.springframework.org/schema/context  
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util.xsd" >
+      
+      <!-- 
+      <context:component-scan base-package="com.web.spring4.bean.impl" />
+      -->
+      
+      <!-- 默认构造函数装配Bean -->
+      <!-- 全限定名，默认Bean ID为全限定名+计数，如com.web.spring4.bean.impl.JayChouAlbum#0 -->
+      <bean class = "com.web.spring4.bean.impl.JayChouAlbum" />  
+      <bean id = "JayChouAlbum" class = "com.web.spring4.bean.impl.JayChouAlbum" />
+      
+      <!-- 构造器注入装配Bean -->
+      <!-- 注入Bean引用 -->
+      <!-- 使用<constructor-arg ref = "" />，ref表明Bean引用 -->
+      <bean id = "CDPlayer" class = "com.web.spring4.bean.impl.CDPlayer" >
+          <constructor-arg ref = "JayChouAlbum" />
+      </bean>
+      <!-- 使用c-命名空间 ，c:构造函数参数-ref="" 或 c:_构造函数参数索引-ref=""(只有一个参数是可省略索引) -->
+      <bean id = "CDPlayer_1" class = "com.web.spring4.bean.impl.CDPlayer" 
+            c:compactDisc-ref = "JayChouAlbum"/>
+      <bean id = "CDPlayer_2" class = "com.web.spring4.bean.impl.CDPlayer" 
+            c:_0-ref = "JayChouAlbum"/>
+      <bean id = "CDPlayer_3" class = "com.web.spring4.bean.impl.CDPlayer" 
+            c:_-ref = "JayChouAlbum"/>
+      <!-- 注入字面量 -->
+      <!-- 使用<constructor-arg value = "" /> -->
+      <bean id = "JayChouAlbum3" class = "com.web.spring4.bean.impl.JayChouAlbum3" >
+          <constructor-arg value = "黑色毛衣" />
+          <constructor-arg value = "周杰伦" />
+      </bean>
+      <!-- 使用c-命名空间 -->
+      <bean id = "JayChouAlbum3_1" class = "com.web.spring4.bean.impl.JayChouAlbum3" 
+            c:_songs = "黑色毛衣" c:_artist = "周杰伦"/>
+      <bean id = "JayChouAlbum3_2" class = "com.web.spring4.bean.impl.JayChouAlbum3" 
+            c:_0 = "黑色毛衣" c:_1 = "周杰伦"/>
+      <!-- 注入集合 -->
+      <!-- 使用 <constructor-arg>，<list>或<set>等，<value>或<ref> -->
+      <bean id = "JayChouAlbum4" class = "com.web.spring4.bean.impl.JayChouAlbum4" >
+          <constructor-arg>
+              <list>
+                  <value>等你下课</value>
+                  <value>七里香</value>
+              </list>
+          </constructor-arg>
+          <constructor-arg value = "周杰伦"/>
+      </bean>
+      <bean id = "CDPlayer2" class = "com.web.spring4.bean.impl.CDPlayer2">
+          <constructor-arg>
+              <list>
+                  <ref bean = "JayChouAlbum"/>
+              </list>
+          </constructor-arg>
+      </bean>
+      
+      <!-- 属性注入Bean -->
+      <!-- 注入Bean引用 -->
+      <!-- 使用<property name="" ref="" /> -->
+      <bean id = "CDPlayer_4" class = "com.web.spring4.bean.impl.CDPlayer" >
+          <property name = "cd1" ref = "JayChouAlbum" />
+      </bean>
+      <!-- 使用 p-命名空间 -->
+      <bean id = "CDPlayer_5" class = "com.web.spring4.bean.impl.CDPlayer" p:cd1-ref = "JayChouAlbum" />
+      <bean id = "CDPlayer_6" class = "com.web.spring4.bean.impl.CDPlayer" p:_0-ref = "JayChouAlbum" />
+      <bean id = "CDPlayer_7" class = "com.web.spring4.bean.impl.CDPlayer" p:_-ref = "JayChouAlbum" />
+      <!-- 注入字面量 -->
+      <bean id = "JayChouAlbum4_1" class = "com.web.spring4.bean.impl.JayChouAlbum4">
+          <property name = "songs">
+              <list>
+                  <value>珊瑚海</value>
+              </list>
+          </property>
+          <property name = "artist" value = "周杰伦" />
+      </bean>
+      
+      <!-- 借助<util:list id = "" ></util:list>装配集合，列表声明到单独的bean -->
+      <util:list id = "JayChouAlbum4_2_songs">
+          <value>等你下课</value> 
+      </util:list>
+      <bean id = "JayChouAlbum4_2" class = "com.web.spring4.bean.impl.JayChouAlbum4" 
+            p:_0-ref = "JayChouAlbum4_2_songs" p:_1 = "周杰伦" />
+             
+</beans>
