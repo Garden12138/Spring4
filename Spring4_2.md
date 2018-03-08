@@ -297,8 +297,6 @@ public class CDPlayerConfig2 {
 </bean>
 <!-- 使用 p-命名空间 -->
 <bean id = "CDPlayer_5" class = "com.web.spring4.bean.impl.CDPlayer" p:cd1-ref = "JayChouAlbum" />
-<bean id = "CDPlayer_6" class = "com.web.spring4.bean.impl.CDPlayer" p:_0-ref = "JayChouAlbum" />
-<bean id = "CDPlayer_7" class = "com.web.spring4.bean.impl.CDPlayer" p:_-ref = "JayChouAlbum" />
 <!-- 注入字面量 -->
 <bean id = "JayChouAlbum4_1" class = "com.web.spring4.bean.impl.JayChouAlbum4">
     <property name = "songs">
@@ -314,5 +312,15 @@ public class CDPlayerConfig2 {
     <value>等你下课</value>
 </util:list>
 <bean id = "JayChouAlbum4_2" class = "com.web.spring4.bean.impl.JayChouAlbum4"
-      p:_0-ref = "JayChouAlbum4_2_songs" p:_1 = "周杰伦" />
+      p:songs-ref = "JayChouAlbum4_2_songs" p:artist = "周杰伦" />
 ```
+
+#### 导入与混合配置
+
+* JavaConfig引用JavaConfig
+
+* JavaConfig引用XML
+
+* XML引用XML
+
+* XML引用JavaConfig
