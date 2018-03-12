@@ -116,8 +116,8 @@
     public CDPlayer() {
       super();
     }
- //@Resource /*setter构造必需含有空构造函数*/
- //@Qualifier("jayChouAlbum2")
+  //@Resource /*setter构造必需含有空构造函数*/
+  //@Qualifier("jayChouAlbum2")
     public void setCd1(CompactDisc cd1) {
       this.cd1 = cd1;
     }
