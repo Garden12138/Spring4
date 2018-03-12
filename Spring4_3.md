@@ -104,20 +104,20 @@
   @Component
   public class CDPlayer implements MediaPlayer{
     @Resource
-//	@Qualifier("jayChouAlbum2")    /*限定符即字符串为Bean ID*/
+  //@Qualifier("jayChouAlbum2")    /*限定符即字符串为Bean ID*/
   	@QualiZfier("JCA")
 	  private CompactDisc cd1;
-//	@Autowired /*@Resource不可用于构造函数*/
-//	@Qualifier("jayChouAlbum2")  /*@Qualifier不能用于构造函数*/
-	  public CDPlayer(CompactDisc compactDisc) {
+  //@Autowired /*@Resource不可用于构造函数*/
+  //@Qualifier("jayChouAlbum2")  /*@Qualifier不能用于构造函数*/
+    public CDPlayer(CompactDisc compactDisc) {
       super();
       this.cd1 = compactDisc;
-	}
+    }
     public CDPlayer() {
       super();
-  }
-//	@Resource /*setter构造必需含有空构造函数*/
-//	@Qualifier("jayChouAlbum2")
+    }
+ //@Resource /*setter构造必需含有空构造函数*/
+ //@Qualifier("jayChouAlbum2")
     public void setCd1(CompactDisc cd1) {
       this.cd1 = cd1;
     }
