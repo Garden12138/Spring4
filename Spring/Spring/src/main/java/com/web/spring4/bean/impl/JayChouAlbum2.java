@@ -1,7 +1,11 @@
 package com.web.spring4.bean.impl;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.web.spring4.annotation.JCA;
+import com.web.spring4.annotation._2;
 import com.web.spring4.bean.CompactDisc;
 
 /**
@@ -10,6 +14,10 @@ import com.web.spring4.bean.CompactDisc;
  * 2018年3月5日
  */
 @Component
+@Qualifier("JCA")
+//@Qualifier("_2")
+@JCA
+@_2
 public class JayChouAlbum2 implements CompactDisc{
 
 	private String songs[] = {"告白气球"};
