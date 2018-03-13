@@ -38,6 +38,7 @@ public interface ConditionContext {
 	 * Return the {@link BeanDefinitionRegistry} that will hold the bean definition
 	 * should the condition match or {@code null} if the registry is not available.
 	 * @return the registry or {@code null}
+   * 检查bean定义
 	 */
 	BeanDefinitionRegistry getRegistry();
 
@@ -46,6 +47,7 @@ public interface ConditionContext {
 	 * definition should the condition match or {@code null} if the bean factory
 	 * is not available.
 	 * @return the bean factory or {@code null}
+   * 检查bean是否存在，探查bean的属性
 	 */
 	ConfigurableListableBeanFactory getBeanFactory();
 
@@ -53,6 +55,7 @@ public interface ConditionContext {
 	 * Return the {@link Environment} for which the current application is running
 	 * or {@code null} if no environment is available.
 	 * @return the environment or {@code null}
+   * 检查环境变量是否存在以及环境变量值
 	 */
 	Environment getEnvironment();
 
@@ -60,6 +63,7 @@ public interface ConditionContext {
 	 * Return the {@link ResourceLoader} currently being used or {@code null}
 	 * if the resource loader cannot be obtained.
 	 * @return a resource loader or {@code null}
+   * 检查加载的资源
 	 */
 	ResourceLoader getResourceLoader();
 
@@ -67,6 +71,7 @@ public interface ConditionContext {
 	 * Return the {@link ClassLoader} that should be used to load additional
 	 * classes or {@code null} if the default classloader should be used.
 	 * @return the class loader or {@code null}
+   * 检查加载的类是否存在
 	 */
 	ClassLoader getClassLoader();
 
