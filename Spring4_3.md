@@ -1,4 +1,4 @@
-# Spring4
+  # Spring4
 
 #### 自动化装配Bean的歧义性
 
@@ -236,6 +236,57 @@
 
 
 #### 条件化的Bean装配
+
+* 适用场景：
+  * bean只有在应用的类路径下包含特定的库时才创建。
+  * 只有当其他某个特定Bean声明后才被创建。
+  * 只有在某个特定环境变量才被创建。
+* 使用方法
+  * 注解@Conditional与@Bean一起使用于创建Bean的方法之上（使用JavaConfig装配）
+  * 创建条件类，实现Condition接口。
+    * [了解Condition接口的match方法参数](https://github.com/Garden12138/Spring4/blob/master/spring-source-code.md)
+* Demo
+
+```
+package com.web.spring4.config;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+import com.web.spring4.bean.CompactDisc;
+import com.web.spring4.bean.condition.ChooseJayChouAlbum;
+import com.web.spring4.bean.impl.*;
+/**
+ * JavaConfig - 条件化装配Bean
+ * @author Garden
+ * 2018年3月13日
+ */
+@Configuration
+public class CDPlayerConfig3 {
+	@Bean
+	@Conditional(ChooseJayChouAlbum.class)
+	public  CompactDisc jayChouAlbum(){
+		return new JayChouAlbum();
+	}
+	@Bean
+	public  CompactDisc jayChouAlbum2(){
+		return new JayChouAlbum2();
+	}
+}
+```
+
+```
+package com.web.spring4.bean.condition;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+public class ChooseJayChouAlbum implements Condition{
+	@Override
+	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		// TODO Auto-generated method stub
+		Object ob = context.getBeanFactory().getBean("jayChouAlbum2");
+		return null == ob ? false : true;
+	}
+}
+```
 
 #### 特殊条件化Bean装配-Profile Bean
 
