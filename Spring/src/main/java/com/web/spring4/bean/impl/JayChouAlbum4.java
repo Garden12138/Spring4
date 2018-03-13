@@ -11,7 +11,7 @@ import com.web.spring4.bean.CompactDisc;
  * @author Garden
  * 2018年3月5日
  */
-@Component
+//@Component
 public class JayChouAlbum4 implements CompactDisc{
 
 	private List<String> songs;
