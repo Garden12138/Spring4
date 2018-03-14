@@ -290,6 +290,139 @@ public class ChooseJayChouAlbum implements Condition{
 
 #### 特殊条件化Bean装配-Profile Bean
 
+* 使用场景：避免应用程序在环境迁移时出现代码重构的情况，如数据库配置，加密算法以及外部系统的集成等。
+* 使用方法：
+  * 配置Profile Bean：
+    * JavaConfig装配：使用@Profile与@Bean结合使用，声明该bean只有在指定Profile激活的情况下才创建。
+
+    ```
+    package com.web.spring4.config;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.context.annotation.Profile;
+    @Configuration
+    public class DataSourceConfig {
+      @Bean(name = "DataSource")
+      @Profile("pro")
+      public String proDataSource(){
+        return "pro-dataSource";
+      }
+      @Bean(name = "DataSource")
+      @Profile("dev")
+      public String devDataSource(){
+        return "dev-dataSource";
+      }
+    }
+    ```
+
+    * XML装配：使用< beans >标签属性profile，声明该bean只有在指定Profile激活的情况下才创建。
+
+    ```
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+      http://www.springframework.org/schema/context  
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util.xsd" >
+
+      <beans profile="dev">
+          <bean id="dataSource" class="java.lang.String" />
+      <beans>
+
+      <beans profile="pro">
+          <bean id="dataSource" class="java.lang.String" />
+      <beans>
+
+    </beans>
+    ```
+
+  * 激活Profile Bean：
+    * 作为DispatcherServlet的初始化参数
+
+    ```
+    <servlet>
+        <servlet-name>springMVC</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:SpringMVC.xml,classpath:config.xml</param-value>
+        </init-param>
+        <!-- Servlet激活默认Profile Bean -->
+        <init-param>
+            <param-name>spring.profiles.default</param-name>
+            <param-value>dev</param-value>
+        </init-param>
+        <!--  
+        <init-param>
+            <param-name>spring.profiles.active</param-name>
+            <param-value>pro</param-value>
+        </init-param>
+        -->
+        <load-on-startup>1</load-on-startup>
+   </servlet>
+   <servlet-mapping>
+       <servlet-name>springMVC</servlet-name>
+       <url-pattern>/</url-pattern>
+   </servlet-mapping>
+   ```
+
+    * 作为WEB应用的上下文参数
+
+    ```
+    <!-- 上下文激活默认Profile Bean -->
+    <context-param>
+        <param-name>spring.profiles.default</param-name>
+        <param-value>dev</param-value>
+    </context-param>
+    <!--  
+    <context-param>
+        <param-name>spring.profiles.active</param-name>
+        <param-value>pro</param-value>
+    </context-param>
+    -->
+    ```
+
+    * 测试集成环境
+
+    ```
+    package com.web.spring4.test;
+    import static org.junit.Assert.*;
+    import javax.annotation.Resource;
+    import org.junit.Test;
+    import org.junit.runner.RunWith;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.test.context.ActiveProfiles;
+    import org.springframework.test.context.ContextConfiguration;
+    import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+    import com.web.spring4.bean.impl.*;
+    import com.web.spring4.config.DataSourceConfig;
+    @RunWith(SpringJUnit4ClassRunner.class)
+    @ContextConfiguration(classes=DataSourceConfig.class)
+    @ActiveProfiles("pro")
+    public class DataSourceConfigTest {
+      @Autowired    /*顺序扫描*/
+      private String dataSource;   
+      @Test
+      public void test(){
+        System.out.println(dataSource.toString());
+      }
+    }
+    ```
+
+    * 作为JNDI条目
+    * 作为环境变量
+    * 作为JVM的系统属性
+
 #### Bean的作用域
 
 #### Spring表达式(spEL)
