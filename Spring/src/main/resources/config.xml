@@ -125,5 +125,6 @@
      <bean class="com.web.spring4.config.CDConfig"/>
      <bean id = "CDPlayer" class = "com.web.spring4.bean.impl.CDPlayer" 
             c:compactDisc-ref = "JayChouAlbum"/> 
-      -->    
+      -->
+      <bean class="com.web.spring4.config.DataSourceConfig" />    
 </beans>
