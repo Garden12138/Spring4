@@ -347,6 +347,7 @@ public class ChooseJayChouAlbum implements Condition{
     ```
 
   * 激活Profile Bean：
+    * spring.profiles.active属性比spring.profiles.default优先级高
     * 作为DispatcherServlet的初始化参数
 
     ```
