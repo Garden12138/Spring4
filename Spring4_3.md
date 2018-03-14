@@ -369,13 +369,12 @@ public class ChooseJayChouAlbum implements Condition{
         </init-param>
         -->
         <load-on-startup>1</load-on-startup>
-   </servlet>
-   <servlet-mapping>
-       <servlet-name>springMVC</servlet-name>
-       <url-pattern>/</url-pattern>
-   </servlet-mapping>
-
-   ```
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>springMVC</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    ```
 
     * 作为WEB应用的上下文参数
 
