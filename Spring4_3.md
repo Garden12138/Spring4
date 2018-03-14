@@ -426,4 +426,61 @@ public class ChooseJayChouAlbum implements Condition{
 
 #### Bean的作用域
 
+* 单例(Singleton)：在整个应用中，只创建一个bean实例，默认创建的bean的作用域为单例。
+* 原型(Prototype)：每次注入或Spring应用上下文获取Bean时，新创建一个bean实例
+
+```
+//自动化装配
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class BeanDemo{
+  ...
+}
+```
+
+```
+//JavaConfig装配
+@Bean
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public BeanDemo beanDemo(){
+  return new BeanDemo();
+}
+```
+
+```
+//XML装配
+< bean id = "beanDemo" class="" scope="prototype" />
+```
+
+* 会话(Session)：web应用中，为每个会话创建一个bean实例
+* 请求(Request)：web应用中，为每个请求创建一个bean实例
+
+```
+//自动化装配
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_SESSION,proxyMode=ScopedProxyMode.INTERFACES)
+//@Scope(ConfigurableBeanFactory.SCOPE_SESSION,proxyMode=ScopedProxyMode.TARGET_CLASS)
+public class BeanDemo{
+  ...
+}
+```
+
+```
+//JavaConfig装配
+@Bean
+@Scope(ConfigurableBeanFactory.SCOPE_SESSION,proxyMode=ScopedProxyMode.INTERFACES)
+//@Scope(ConfigurableBeanFactory.SCOPE_SESSION,proxyMode=ScopedProxyMode.TARGET_CLASS)
+public BeanDemo beanDemo(){
+  return new BeanDemo();
+}
+```
+
+```
+//XML装配
+< bean id = "beanDemo" class="" scope="session" >
+    < aop:scoped-proxy proxy-target-class="false" />
+    <aop:scoped-proxy />
+< /bean >
+```
+
 #### Spring表达式(spEL)
