@@ -374,6 +374,7 @@ public class ChooseJayChouAlbum implements Condition{
        <servlet-name>springMVC</servlet-name>
        <url-pattern>/</url-pattern>
    </servlet-mapping>
+
    ```
 
     * 作为WEB应用的上下文参数
