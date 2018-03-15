@@ -494,7 +494,7 @@ public BeanDemo beanDemo(){
   }
   ```
 
-  * 外部注入
+  * 外部注入（运行时注入）
   ```
   data.properties
   songs = \u53CC\u622A\u68CD
@@ -521,3 +521,81 @@ public BeanDemo beanDemo(){
   }
   ```
   [Environment API](https://github.com/Garden12138/Spring4/blob/master/spring-source-code.md)
+    * 使用占位符：占位符用"${}"表示。自动装配和JavaConfig都需配置PropertySourcesPlaceholderConfigurer Bean，用于解析占位符
+    ```
+    自动装配
+    public JayChouAlbum3(@Value("${album.songs}") String songs
+    ,@Value("${album.artist}") String artist) {
+      super();
+      this.songs = songs;
+      this.artist = artist;
+    }
+    ```
+    ```
+    JavaConfig
+    package com.web.spring4.config;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.context.annotation.PropertySource;
+    import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+    import com.web.spring4.bean.CompactDisc;
+    import com.web.spring4.bean.impl.JayChouAlbum3;
+    @Configuration
+    @PropertySource("classpath:/data.properties")    //设置属性源
+    public class CDConfig {
+      @Bean    //必须配置 用于解析占位符
+      public static PropertySourcesPlaceholderConfigurer placeholderCongigurer(){
+        return new PropertySourcesPlaceholderConfigurer();
+      }
+      @Bean
+      public CompactDisc jayChouAlbum3(@Value("${album.songs}") String songs,@Value("${album.artist}") String artist){
+        return new JayChouAlbum3(songs,artist);
+      }
+    }
+    ```
+    ```
+    XML
+    <context:property-placeholder location="classpath:/data.properties"/>
+    <bean id = "JayChouAlbum3" class = "com.web.spring4.bean.impl.JayChouAlbum3" >
+        <constructor-arg value = "${album.songs}" />
+        <constructor-arg value = "${album.artist}" />
+    </bean>
+    ```
+
+    * 使用Spring表达式
+      * 使用#{}标识。
+      * 特性：
+        * 表示字面量
+        ```
+        整型：#{1}
+        浮点型：#{3.14}，#{9.87E4}
+        String：#{'string'}
+        Boolean：#{false}
+        ```
+        * 使用bean的ID来引用bean。
+        * 访问bean的属性以及调用bean方法。
+        ```
+        #{JayChouAlbum3}
+        #{JayChouAlbum3.songs}
+        #{JayChouAlbum3.getSongs()}
+        #{JayChouAlbum3.getSongs()?.toString()}    //若getSongs()返回为null，这不执行toString()
+        ```
+        * 对值进行算术，关系和逻辑运算。
+        ```
+        #{2 * T(java.lang.Math).PI > 1 and 1 > 0 ? "true or not null" : "false or null"}
+        T()元算符的结果是Class对象
+        ```
+        * 正则表达式匹配。
+        ```
+        #{admin.email matches '[a-zA-z0-9._%+-]+@[a-zA-z0-9.-]+\\.com'}
+        ```
+        * 集合操作。
+        ```
+        #{JayChouAlbum5.songs[0]}
+        #{JayChouAlbum5.songs[T(java.lang.Math).random * 10]}
+        #{JayChouAlbum5.songs.?[title eq '夜曲']} -查询运算符 title为song属性
+        #{JayChouAlbum5.songs.^[title eq '夜曲']} -查询第一项运算符
+        #{JayChouAlbum5.songs.$[title eq '夜曲']} -查询最后一项运算符
+        #{JayChouAlbum5.songs.！[title]} -投影运算符  
+        ```
