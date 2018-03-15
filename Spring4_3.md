@@ -483,4 +483,41 @@ public BeanDemo beanDemo(){
 < /bean >
 ```
 
-#### 运行时注入
+#### 运行时值注入
+
+* 值注入方式
+  * 内部注入（硬编码注入）
+  ```
+  @Bean
+  public CompactDisc jayChouAlbum3(){
+    return new JayChouAlbum3("双截棍","周杰伦");
+  }
+  ```
+
+  * 外部注入
+  ```
+  data.properties
+  songs = \u53CC\u622A\u68CD
+  artist = \u5468\u6770\u4F26
+  ```
+  ```
+  package com.web.spring4.config;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.PropertySource;
+  import org.springframework.core.env.Environment;
+  import com.web.spring4.bean.CompactDisc;
+  import com.web.spring4.bean.impl.JayChouAlbum3;
+  @Configuration
+  @PropertySource("classpath:/data.properties")
+  public class CDConfig {
+    @Autowired
+    private Environment env;
+    @Bean
+    public CompactDisc jayChouAlbum3(){
+      return new JayChouAlbum3(env.getProperty("songs"),env.getProperty("artist"));
+    }
+  }
+  ```
+  [Environment API]()
