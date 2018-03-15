@@ -18,6 +18,8 @@
       <!-- 
       <context:component-scan base-package="com.web.spring4.bean.impl" />
       -->
+      <context:property-placeholder location="classpath:/data.properties"/>
+      
       
       <!-- 默认构造函数装配Bean -->
       <!-- 全限定名，默认Bean ID为全限定名+计数，如com.web.spring4.bean.impl.JayChouAlbum#0 -->
@@ -47,12 +49,12 @@
        -->
       <!-- 注入字面量 -->
       <!-- 使用<constructor-arg value = "" /> -->
-      <!--  
+      
       <bean id = "JayChouAlbum3" class = "com.web.spring4.bean.impl.JayChouAlbum3" >
-          <constructor-arg value = "黑色毛衣" />
-          <constructor-arg value = "周杰伦" />
+          <constructor-arg value = "${album.songs}" />
+          <constructor-arg value = "${album.artist}" />
       </bean>
-      -->
+      
       <!-- 使用c-命名空间 -->
       <!--
       <bean id = "JayChouAlbum3_1" class = "com.web.spring4.bean.impl.JayChouAlbum3"
@@ -64,17 +66,16 @@
        -->
        <!-- 注入集合 -->
        <!-- 使用 <constructor-arg>，<list>或<set>等，<value>或<ref> -->
-       <!--  
        <bean id = "JayChouAlbum4" class = "com.web.spring4.bean.impl.JayChouAlbum4" >
            <constructor-arg>
                <list>
-                   <value>等你下课</value>
-                   <value>七里香</value>
+                   <!-- <value>#{JayChouAlbum3.songs}</value> -->
+                   <value>#{JayChouAlbum3.getSongs()}</value>
                </list>
            </constructor-arg>
-           <constructor-arg value = "周杰伦"/>
-      </bean>
-      -->
+           <constructor-arg value = "#{JayChouAlbum3.artist}"/>
+       </bean>
+
       <!--
       <bean id = "CDPlayer2" class = "com.web.spring4.bean.impl.CDPlayer2">
           <constructor-arg>
