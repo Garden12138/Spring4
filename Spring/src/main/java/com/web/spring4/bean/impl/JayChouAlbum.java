@@ -1,5 +1,8 @@
 package com.web.spring4.bean.impl;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Primary;
@@ -32,4 +35,23 @@ public class JayChouAlbum implements CompactDisc{
 		System.out.println("正在播放："+ songs[0] + "-" +artist);
 	}
 	
+	@Override
+	public void audiencePlay(String audienceName,int age){
+		System.out.println(age + "岁的" + audienceName + " 正在播放："+ songs[0] + "-" +artist);
+	}
+
+	@Override
+	public List<String> getSongsList() {
+		// TODO Auto-generated method stub
+		return Arrays.asList(this.songs);
+	}
+
+	@Override
+	public void setSongsList(List<String> songsList) {
+		// TODO Auto-generated method stub
+		List<String> songs = Arrays.asList(this.songs);
+		songs.clear();
+		songs.addAll(songsList);
+		this.songs = (String[]) songs.toArray();
+	}
 }

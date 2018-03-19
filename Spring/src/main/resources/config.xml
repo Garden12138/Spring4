@@ -8,12 +8,16 @@
     xmlns:task="http://www.springframework.org/schema/task"
     xmlns:c="http://www.springframework.org/schema/c"
     xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:aop="http://www.springframework.org/schema/aop"
     xsi:schemaLocation="http://www.springframework.org/schema/beans  
       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
       http://www.springframework.org/schema/context  
       http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util.xsd" >
+      http://www.springframework.org/schema/util/spring-util.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop.xsd" >
+      
       
       <!-- 
       <context:component-scan base-package="com.web.spring4.bean.impl" />
@@ -49,12 +53,12 @@
        -->
       <!-- 注入字面量 -->
       <!-- 使用<constructor-arg value = "" /> -->
-      
+      <!--  
       <bean id = "JayChouAlbum3" class = "com.web.spring4.bean.impl.JayChouAlbum3" >
           <constructor-arg value = "${album.songs}" />
           <constructor-arg value = "${album.artist}" />
       </bean>
-      
+      -->
       <!-- 使用c-命名空间 -->
       <!--
       <bean id = "JayChouAlbum3_1" class = "com.web.spring4.bean.impl.JayChouAlbum3"
@@ -66,16 +70,19 @@
        -->
        <!-- 注入集合 -->
        <!-- 使用 <constructor-arg>，<list>或<set>等，<value>或<ref> -->
+       <!--  
        <bean id = "JayChouAlbum4" class = "com.web.spring4.bean.impl.JayChouAlbum4" >
            <constructor-arg>
                <list>
+        -->
                    <!-- <value>#{JayChouAlbum3.songs}</value> -->
+                   <!--
                    <value>#{JayChouAlbum3.getSongs()}</value>
                </list>
            </constructor-arg>
            <constructor-arg value = "#{JayChouAlbum3.artist}"/>
        </bean>
-
+       -->
       <!--
       <bean id = "CDPlayer2" class = "com.web.spring4.bean.impl.CDPlayer2">
           <constructor-arg>
@@ -127,5 +134,36 @@
      <bean id = "CDPlayer" class = "com.web.spring4.bean.impl.CDPlayer" 
             c:compactDisc-ref = "JayChouAlbum"/> 
       -->
-      <bean class="com.web.spring4.config.DataSourceConfig" />    
+      <bean class="com.web.spring4.config.DataSourceConfig" />
+      
+      <aop:aspectj-autoproxy />
+      <bean id="audience" class="com.web.spring4.aspect.Audience" />
+      
+      <aop:config>
+          <aop:aspect ref="audience">
+          <aop:pointcut expression="execution(** com.web.spring4.bean.impl.JayChouAlbum.play(..))" 
+                        id="play"/>
+          <aop:pointcut expression=
+          "execution(** com.web.spring4.bean.impl.JayChouAlbum.audiencePlay(String,int)) 
+                                    and args(audienceName,age)" id="audiencePlay"/>
+          <!--  
+              <aop:before pointcut-ref="play" method="openCDPlayer"/>
+              <aop:before pointcut-ref="play" method="putCDIntoPlayer"/>
+              <aop:after-returning pointcut-ref="play" method="praise"/>
+              <aop:after-throwing pointcut-ref="play" method="makeComplaints"/>
+           -->
+           <!--  
+              <aop:around pointcut-ref="play" method="action"/>
+           -->
+              <aop:before pointcut-ref="audiencePlay" method="putCDIntoPlayer"/>
+          </aop:aspect>
+      </aop:config>
+      <bean id="CDUtilImpl" class="com.web.spring4.utils.impl.CDUtilImpl"/>
+      <aop:config>
+          <aop:aspect>
+              <aop:declare-parents types-matching="com.web.spring4.bean.CompactDisc+" 
+                                   implement-interface="com.web.spring4.utils.CDUtil"
+                                   delegate-ref="CDUtilImpl"/>
+          </aop:aspect>
+      </aop:config>    
 </beans>
