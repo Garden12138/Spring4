@@ -185,5 +185,6 @@ public class CDConfig {
 <bean id="audience" class="com.web.spring4.aspect.Audience" />
 ```
 
+#### 利用AOP为现有类添加新功能
 
 #### 注入AspectJ切面
