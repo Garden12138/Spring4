@@ -187,4 +187,56 @@ public class CDConfig {
 
 #### 利用AOP为现有类添加新功能
 
+* 原理：Spring在创建带有@Aspect的bean的时候会创建一个代理类，当调用者（实例化对象）调用被通知方法时，代理先拦截调用，先进行代理逻辑再调用被通知方法。故可以利用AOP引入新接口以及其实现的代理，即引入代理是现有代理的子类，调用时直接进行强制类型转换，调用被引入的新方法。
+[![微信图片_20180320195215.png](https://i.loli.net/2018/03/20/5ab0f608780ad.png)](https://i.loli.net/2018/03/20/5ab0f608780ad.png)
+
+* 代码实现
+
+```
+-- java
+package com.web.spring4.aspect;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.DeclareParents;
+import com.web.spring4.utils.CDUtil;
+import com.web.spring4.utils.impl.CDUtilImpl;
+/**
+* CD工具类切面
+* @author Garden
+* 2018年3月19日
+*/
+@Aspect
+public class CDUtilAspect {
+@DeclareParents(value="com.web.spring4.bean.CompactDisc+",defaultImpl=CDUtilImpl.class)
+public static CDUtil cdUtil;
+}
+
+-- xml
+<bean id="CDUtilImpl" class="com.web.spring4.utils.impl.CDUtilImpl"/>
+<aop:config>
+    <aop:aspect>
+        <aop:declare-parents types-matching="com.web.spring4.bean.CompactDisc+"
+                             implement-interface="com.web.spring4.utils.CDUtil"
+                             delegate-ref="CDUtilImpl"/>
+    </aop:aspect>
+</aop:config>
+```
+
+```
+-- java
+@Bean
+public CDUtilAspect cdUtilAspect(){
+  return new CDUtilAspect();
+}
+
+-- xml
+<bean id="CDUtilAspect" class="com.web.spring4.aspect.CDUtilAspect"/>
+```
+
+```
+@Test
+public void cdShouldNotBeNull1(){
+  CDUtil cdUtil = (CDUtil)jayChouAlbum;
+  cdUtil.addSongs();
+}
+```
 #### 注入AspectJ切面
