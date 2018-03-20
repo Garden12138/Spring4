@@ -157,4 +157,33 @@ public class CDConfig {
 
 #### 使用XML创建切面
 
+* 声明切面：使用元素< aop:config >声明AOP配置，< aop:aspect >声明切面，< aop:pointcut >声明切点，< aop:before >(前置)、< aop:after >(后置)、< aop:after-returning >(返回)、< aop:after-throwing >(异常)、< aop:around >(环绕)声明通知。
+
+```
+<aop:config>
+    <aop:aspect ref="audience">
+    <aop:pointcut expression="execution(** com.web.spring4.bean.impl.JayChouAlbum.play(..))"
+                  id="play"/>
+    <aop:pointcut expression=
+    "execution(** com.web.spring4.bean.impl.JayChouAlbum.audiencePlay(String,int))
+                              and args(audienceName,age)" id="audiencePlay"/>
+        <aop:before pointcut-ref="play" method="openCDPlayer"/>
+        <aop:before pointcut-ref="play" method="putCDIntoPlayer"/>
+        <aop:after-returning pointcut-ref="play" method="praise"/>
+        <aop:after-throwing pointcut-ref="play" method="makeComplaints"/>
+        <aop:around pointcut-ref="play" method="action"/>
+        <!-- <aop:before pointcut-ref="audiencePlay" method="putCDIntoPlayer"/> -->
+    </aop:aspect>
+</aop:config>
+```
+
+* 声明切面为bean
+* 启动AspectJ自动代理：使用元素< aop:aspectj-autoproxy >启动AspectJ自动代理
+
+```
+<aop:aspectj-autoproxy />
+<bean id="audience" class="com.web.spring4.aspect.Audience" />
+```
+
+
 #### 注入AspectJ切面
