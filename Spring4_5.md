@@ -65,6 +65,42 @@
     }
   }
   ```
+  * PS
+    * AbstractAnnotationConfigDispatcherServletInitializer的任意扩展类会自动配置DispatcherServlet和Spring应用上下文，Spring应用上下文位于应用程序的Servlet上下文之中。
+    * getServletConfigClasses()方法返回带有@Configuration注解的类将来定义DispatcherServlet应用上下文的bean，getRootConfigClasses()方法返回带有@Configuration注解的类将来定义ContextLoaderListener应用上下文的bean。
+
+* 启用SpringMVC
+  * XML配置
+  ```
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+         xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+         http://www.springframework.org/schema/context  
+         http://www.springframework.org/schema/context/spring-context.xsd  
+         http://www.springframework.org/schema/mvc  
+         http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+         http://www.springframework.org/schema/task
+         http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+         <!-- 扫描业务逻辑包 -->
+         <context:component-scan base-package="com.web.controller" />
+         <!-- 静态资源配置 -->
+         <mvc:resources location="/res/"  mapping="/res/**"  cache-period="31536000" />
+         <!-- 配置Viewer-->
+         <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+             <property name="prefix" value="/jsp/"></property>
+             <property name="suffix" value=".jsp"></property>
+         </bean>
+         <!-- 配置SpringMvc注解，启动SpringMvc -->
+         <mvc:annotation-driven />
+  </beans>
+  ```
+
+  * JavaConfig配置
   ```
   package com.web.spring4.config;
   import org.springframework.context.annotation.Bean;
@@ -81,36 +117,19 @@
   @Import(ControllerConfig.class)    /*启动组件扫描，主要扫描控制器以及其他组件*/
   public class WebConfig extends WebMvcConfigurerAdapter{    /*继承抽象类，实现配置默认servlet拦截方法*/
     @Bean
-	  public ViewResolver viewResolver(){    /*配置JSP视图解析器*/
+    public ViewResolver viewResolver(){    /*配置JSP视图解析器*/
       InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-		  resolver.setPrefix("/WEB-INF/jsp/");
-		  resolver.setSuffix(".jsp");
-		  resolver.setExposeContextBeansAsAttributes(true);
-		  return resolver;
+      resolver.setPrefix("/WEB-INF/jsp/");
+      resolver.setSuffix(".jsp");
+      resolver.setExposeContextBeansAsAttributes(true);
+      return resolver;
     }
     @Override
     public void configureDefaultServletHandling(
       DefaultServletHandlerConfigurer configurer) {    /*配置静态资源的处理，将静态资源的请求转移至默认servlet*/
-		  configurer.enable();
+      configurer.enable();
     }
   }
   ```
-  ```
-  package com.web.spring4.config;
-  import org.springframework.context.annotation.ComponentScan;
-  import org.springframework.context.annotation.ComponentScan.Filter;
-  import org.springframework.context.annotation.Configuration;
-  import org.springframework.context.annotation.FilterType;
-  import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-  @Configuration
-  @ComponentScan(basePackages={"com.web.spring4.dao","com.web.spring4.service"},excludeFilters={@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)}
-  public class RootConfig {
-  }
-  ```
-  * PS
-    * AbstractAnnotationConfigDispatcherServletInitializer的任意扩展类会自动配置DispatcherServlet和Spring应用上下文，Spring应用上下文位于应用程序的Servlet上下文之中。
-    * getServletConfigClasses()方法返回带有@Configuration注解的类将来定义DispatcherServlet应用上下文的bean，getRootConfigClasses()方法返回带有@Configuration注解的类将来定义ContextLoaderListener应用上下文的bean。
-
-* 启用SpringMVC
 
 * 搭建控制器
