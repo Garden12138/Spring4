@@ -13,3 +13,104 @@
   * View：视图，将模型渲染入视图并通过响应返回用户。
 
 #### 搭建SpringMVC框架
+
+* 配置DispatcherServlet
+  * web.xml配置
+  ```
+  <!-- 通过ContextLoaderListener加载应用程序servlet上下文 -->
+  <context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:SpringDataSource.xml,classpath:config.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <!-- 通过DispatcherServlet，加载Spring应用上下文 -->
+  <servlet>
+      <servlet-name>springMVC</servlet-name>
+      <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+      <init-param>
+          <param-name>contextConfigLocation</param-name>
+          <param-value>classpath:SpringMVC.xml,classpath:config.xml</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>springMVC</servlet-name>
+      <url-pattern>/</url-pattern>
+  </servlet-mapping>
+  ```
+  * JavaConfig配置
+  ```
+  package com.web.spring4.config;
+  import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+  public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer{
+    /*加载ContextLoaderListener 数据层组件（bean，数据源等）*/
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+      // TODO Auto-generated method stub
+      return new Class<?>[] {RootConfig.class};
+    }
+    /*加载DispatcherServlet web组件（bean，映射处理器，控制器，视图解析器）*/
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+      // TODO Auto-generated method stub
+      return new Class<?>[] {WebConfig.class};
+    }
+    /*将DispatcherServlet映射到'/'*/
+    @Override
+    protected String[] getServletMappings() {
+      // TODO Auto-generated method stub
+      return new String[] {"/"};
+    }
+  }
+  ```
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.ComponentScan;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Import;
+  import org.springframework.web.servlet.ViewResolver;
+  import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+  import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+  import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+  import org.springframework.web.servlet.view.InternalResourceViewResolver;
+  @Configuration
+  @EnableWebMvc    /*启用Spring MVC*/
+  @Import(ControllerConfig.class)    /*启动组件扫描，主要扫描控制器以及其他组件*/
+  public class WebConfig extends WebMvcConfigurerAdapter{    /*继承抽象类，实现配置默认servlet拦截方法*/
+    @Bean
+	  public ViewResolver viewResolver(){    /*配置JSP视图解析器*/
+      InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+		  resolver.setPrefix("/WEB-INF/jsp/");
+		  resolver.setSuffix(".jsp");
+		  resolver.setExposeContextBeansAsAttributes(true);
+		  return resolver;
+    }
+    @Override
+    public void configureDefaultServletHandling(
+      DefaultServletHandlerConfigurer configurer) {    /*配置静态资源的处理，将静态资源的请求转移至默认servlet*/
+		  configurer.enable();
+    }
+  }
+  ```
+  ```
+  package com.web.spring4.config;
+  import org.springframework.context.annotation.ComponentScan;
+  import org.springframework.context.annotation.ComponentScan.Filter;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.FilterType;
+  import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+  @Configuration
+  @ComponentScan(basePackages={"com.web.spring4.dao","com.web.spring4.service"},excludeFilters={@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)}
+  public class RootConfig {
+  }
+  ```
+  * PS
+    * AbstractAnnotationConfigDispatcherServletInitializer的任意扩展类会自动配置DispatcherServlet和Spring应用上下文，Spring应用上下文位于应用程序的Servlet上下文之中。
+    * getServletConfigClasses()方法返回带有@Configuration注解的类将来定义DispatcherServlet应用上下文的bean，getRootConfigClasses()方法返回带有@Configuration注解的类将来定义ContextLoaderListener应用上下文的bean。
+
+* 启用SpringMVC
+
+* 搭建控制器
