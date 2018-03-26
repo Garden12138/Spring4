@@ -131,5 +131,7 @@
     }
   }
   ```
+  * PS：
+    * @Controller注解里使用了@Component注解，故组件扫描@Controller注解的类时会创建候选的bean。
 
 * 搭建控制器
