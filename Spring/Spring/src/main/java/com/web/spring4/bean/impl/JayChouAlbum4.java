@@ -49,5 +49,26 @@ public class JayChouAlbum4 implements CompactDisc{
 		// TODO Auto-generated method stub
 		System.out.println("正在播放：第一首 "+ songs.get(0) + "-" +artist);
 	}
+
+
+	@Override
+	public void audiencePlay(String audienceName,int age) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public List<String> getSongsList() {
+		// TODO Auto-generated method stub
+		return this.songs;
+	}
+
+
+	@Override
+	public void setSongsList(List<String> songsList) {
+		// TODO Auto-generated method stub
+		this.songs.addAll(songsList);
+	}
 	
 }

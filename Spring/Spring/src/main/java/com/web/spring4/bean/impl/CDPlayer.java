@@ -16,7 +16,7 @@ import com.web.spring4.bean.MediaPlayer;
  * @author Garden
  * 2018年3月5日
  */
-@Component
+//@Component
 public class CDPlayer implements MediaPlayer{
 
 	@Resource

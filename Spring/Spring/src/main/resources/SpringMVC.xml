@@ -16,17 +16,18 @@
       
     <!-- 扫描业务逻辑包 -->
     <context:component-scan base-package="com.web.controller" />
-
+    
     <!-- 静态资源配置 -->
     <mvc:resources location="/res/"  mapping="/res/**"  cache-period="31536000" />
-      
+
+    
     <!-- 配置Viewer-->
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/jsp/"></property>
         <property name="suffix" value=".jsp"></property>
     </bean>
 
-    <!-- 配置SpringMvc注解 -->
+    <!-- 配置SpringMvc注解，启动SpringMvc -->
     <mvc:annotation-driven />
 
 </beans>
