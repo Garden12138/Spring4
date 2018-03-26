@@ -135,3 +135,149 @@
     * @Controller注解里使用了@Component注解，故组件扫描@Controller注解的类时会创建候选的bean。
 
 * 搭建控制器
+  * 编写控制器：
+    * 使用@Controller声明控制器，@RequestMapping声明请求，包括请求url（value属性），请求方式（method属性），返回类型（如，produces = "application/json;charset=UTF-8"表明返回json格式数据）。
+    * 模型数据可以用Map，Model，request存放，最终由request携带。
+    * 接收的参数：接收的参数类型均为String。查询参数可以使用@RequestParam；路径参数可以使用@PathVariable；表单参数可以使用封装的对象接收参数。
+  ```
+  package com.web.spring4.controller;
+  import java.util.ArrayList;
+  import java.util.Date;
+  import java.util.List;
+  import java.util.Map;
+  import javax.servlet.http.HttpServletRequest;
+  import javax.validation.Valid;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.stereotype.Controller;
+  import org.springframework.ui.Model;
+  import org.springframework.validation.Errors;
+  import org.springframework.web.bind.annotation.PathVariable;
+  import org.springframework.web.bind.annotation.RequestBody;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RequestMethod;
+  import org.springframework.web.bind.annotation.RequestParam;
+  import com.web.spring4.pojo.Data;
+  import com.web.spring4.repository.DataRepository;
+  @Controller
+  @RequestMapping(value={"/home"})
+  public class HomeController {
+    private DataRepository dataRepository;
+    public DataRepository getDataRepository() {
+      return dataRepository;
+    }
+    public void setDataRepository(DataRepository dataRepository) {
+      this.dataRepository = dataRepository;
+    }
+    @RequestMapping(value={"/show"},method=RequestMethod.GET)
+    public String showHomePage(){
+      return "home";
+    }
+	  @RequestMapping(value={"/load"},method=RequestMethod.GET)
+	  public String loadHomePage(Map model,Model res,HttpServletRequest request){
+      //model.put("data", dataRepository.findData(Long.MAX_VALUE, 20));
+      List<Data> expectData = new ArrayList<Data>();
+		  for(long i = 0; i < 20; i++){
+        expectData.add(new Data(String.valueOf(i),"data"+i,String.valueOf(new Date())));
+      }
+      //model.put("data", expectData);
+		  //res.addAttribute("data", expectData);
+      request.setAttribute("data", expectData); //模型
+      //request.getSession().setAttribute("data", expectData);
+      return "home";                            //视图名
+    }
+    @RequestMapping(value={"/getQueryParams"},method=RequestMethod.GET)
+    public String getQueryParams(Map model,@RequestParam(value="max",defaultValue="20") long max,
+			@RequestParam(value="count",defaultValue="20") int count){
+        model.put("params","max="+max+"&"+"count="+count);
+        return "home";
+    }
+    @RequestMapping(value={"/getPathParams/{max}/{count}"},method=RequestMethod.GET)
+    public String getPathParams(Map model,@PathVariable long max,@PathVariable int count){
+      model.put("params","max="+max+"&"+"count="+count);
+		  return "home";
+    }
+	  @RequestMapping(value={"/getFormParams"},method=RequestMethod.POST)
+	  public String getFormParams(Map model,@Valid Data data,Errors errors){
+      System.out.println(errors.hasErrors());
+      if(errors.hasErrors()){
+        System.out.print("----------");
+        return "index";
+      }
+      model.put("params",data);
+      return "home";
+    }
+  }
+  ```
+  * 编写Mock测试
+  ```
+  package com.web.spring4.test;
+  import static org.junit.Assert.*;
+  import org.junit.Test;
+  import org.junit.runner.RunWith;
+  import com.web.spring4.config.ControllerConfig;
+  import com.web.spring4.config.WebAppInitializer;
+  import com.web.spring4.controller.HomeController;
+  import com.web.spring4.pojo.Data;
+  import com.web.spring4.repository.DataRepository;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.test.context.ContextConfiguration;
+  import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+  import org.springframework.test.web.servlet.MockMvc;
+  import org.springframework.web.servlet.view.InternalResourceView;
+  import static
+       org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+  import static
+       org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+  import static
+       org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+  import static org.hamcrest.Matchers.*;
+  import static org.mockito.Mockito.*;
+  import java.util.ArrayList;
+  import java.util.Date;
+  import java.util.List;
+  @RunWith(SpringJUnit4ClassRunner.class)
+  @ContextConfiguration(classes={WebAppInitializer.class,ControllerConfig.class})
+  public class ControllerMockTest {
+    @Autowired
+	  HomeController hc;
+	  @Test
+	  public void homeControllerShowTest()  {
+      System.out.println("homeControllerShowTest...");
+		  MockMvc mockMvc = standaloneSetup(hc).setSingleView(
+        new InternalResourceView("/WEB-INF/jsp/home.jsp")).build();
+      try {
+        mockMvc.perform(get("/home/show")).andExpect(view().name("home"));
+      } catch (Throwable e) {
+        // TODO Auto-generated catch block
+			  System.out.println("failed..");
+			  e.printStackTrace();
+			  return;
+      }
+		  System.out.println("success");
+    }
+	  @Test
+	  public void homeControllerLoadTest()  {
+      System.out.println("homeControllerLoadTest...");
+		  List<Data> expectData = new ArrayList<Data>();
+		  for(long i = 0; i < 20; i++){
+        expectData.add(new Data(String.valueOf(i),"data"+i,String.valueOf(new Date())));
+      }
+      DataRepository dataRepository = mock(DataRepository.class);
+		  when(dataRepository.findData(Long.MAX_VALUE, 20)).thenReturn(expectData);
+      hc.setDataRepository(dataRepository);
+		  MockMvc mockMvc = standaloneSetup(hc).build();
+      try {
+        mockMvc.perform(get("/home/load"))
+			       .andExpect(view().name("home"))
+			       .andExpect(model().attributeExists("data"))
+			       .andExpect(model().attribute("data", hasItems(expectData.toArray())));
+		  } catch (Throwable e) {
+        // TODO Auto-generated catch block
+			  System.out.println("failed..");
+			  e.printStackTrace();
+			  return;
+      }
+      System.out.println("success");
+    }
+  }
+  ```
