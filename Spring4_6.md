@@ -34,3 +34,177 @@ public interface View{
 | ThymeleafViewResolver | 将视图解析为Thymeleaf定义，视图名与HTML名相匹配 |
 
 #### 常用视图解析器
+
+* InternalResourceViewResolver:
+  * 配置：
+  ```
+  //JavaConfig
+  @Bean
+  public ViewResolver viewResolver(){    /*配置JSP视图解析器*/
+    InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+  	resolver.setPrefix("/WEB-INF/jsp/");
+  	resolver.setSuffix(".jsp");
+  	resolver.setExposeContextBeansAsAttributes(true);
+  	resolver.setViewClass(org.springframework.web.servlet
+      .view.JstlView.class);    /*设置返回View为JSTLView*/
+      return resolver;
+    }
+  ```
+  ```
+  <!-- XML -->
+  <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+  ```
+  * 解析过程：视图解析器将逻辑视图名称与设定前后缀拼接成web内部资源路径，从该路径返回视图，最后DispatcherServlet将模型传至视图进行渲染。
+  * 渲染技术：渲染，即逻辑结构化与数据访问页面，JSP一般使用[JSTL](http://www.runoob.com/jsp/jsp-jstl.html)+JSP标签库（表单绑定标签库+通用标签库）|[EL表达式](https://blog.csdn.net/goskalrie/article/details/51315397)
+    * 表单绑定标签库：绑定模型，取模型属性填充标签值（value）
+      * 标签：
+      [![20180330203951.png](https://i.loli.net/2018/03/30/5abe304440832.png)](https://i.loli.net/2018/03/30/5abe304440832.png)
+      * 适用场景：表单提交
+      ```
+      视图（JSP）
+      ```
+      ```
+      <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+      <%@ taglib uri="http://www.springframework.org/tags/form" prefix="sf" %>
+      <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+      <html>
+      <body>
+          <h2>表单绑定标签库</h2>
+          <c:if test="${params!=null}">
+          <sf:form action="http://192.168.23.5:8080/Spring/home/getFormParamsByFormBindTagRespo" method="POST" commandName="params">
+              id:<sf:input path="id"/></br>
+              message:<sf:input path="message"/></br>
+              time:<sf:input path="time"/></br>
+              <input type="submit" value="commit" />
+          </sf:form>
+          </c:if>
+      </body>
+      </html>
+      ```
+      ```
+      控制器
+      ```
+      ```
+      @RequestMapping(value={"/showFormbindtagRespo"},method=RequestMethod.GET)
+      public String showFormBindTagRespoPage(Map model){
+        model.put("params", new Data("","",""));
+        return "formbindtagrespo";
+      }
+      @RequestMapping(value={"/getFormParamsByFormBindTagRespo"},method=RequestMethod.POST)
+      public String getFormParamsByFormBindTagRespo(Map model,@Valid Data data,Errors errors){
+        System.out.println(errors.hasErrors());
+        if(errors.hasErrors()){
+          System.out.print("----------");
+          return "index";
+        }
+        model.put("params",data);
+        return "formbindtagrespo";
+      }
+      ```
+    * 通用标签库
+      * 标签：
+      [![20180330214049.png](https://i.loli.net/2018/03/30/5abe3e75b2a71.png)](https://i.loli.net/2018/03/30/5abe3e75b2a71.png)
+      * 适用场景：
+        * 国际化信息：使用标签<s:message>
+        ```
+        配置国际化信息源
+        WebConfig.java
+        ```
+        ```
+        @Bean
+        public MessageSource messageSource(){    /*国际化信息配置*/
+          ReloadableResourceBundleMessageSource messageSource =
+          new ReloadableResourceBundleMessageSource();
+          messageSource.setBasename("classpath:/language");  /*属性文件基本名称，如language_zh.properties*/
+          messageSource.setCacheSeconds(10);
+          return messageSource;
+        }
+        ```
+        ```
+        国际化信息属性文件
+        language_zh.properties
+        ```
+        ```
+        spring4.username=\u7528\u6237\u540D
+        ```
+        ```
+        视图（JSP）
+        ```
+        ```
+        <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+        <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
+        <body>
+            <h2>通用标签库</h2>
+            <h3>国际化信息应用</h3>
+            <s:message code="spring4.username"/>
+        </body>
+        </html>
+        ```
+        * 创建URL:使用标签<s:url>，任务是创建URL，赋值到变量或直接渲染到响应中。
+        ```
+        视图（JSP）
+        ```
+        ```
+        <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+        <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
+        <body>
+        <h2>通用标签库</h2>
+        <h3>创建URL应用</h3>
+            <a href="<s:url value="/home/show" />">直接渲染响应跳转至home.jsp</a></br>
+            <s:url value="/home/show" var="jumpHome"/>
+            <a href="${jumpHome}">先赋值变量再渲染响应跳转至home.jsp</a></br>
+            <s:url value="/home/getQueryParams" var="jumpHomeByQueryParams">
+                <s:param name="max" value="10" />
+                <s:param name="count" value="10" />
+            </s:url>
+            <a href="${jumpHomeByQueryParams}">通过查询参数跳转值home.jsp</a></br>
+            <s:url value="/home/getPathParams/{max}/{count}" var="jumpHomeByPathParams">
+                <s:param name="max" value="11" />
+                <s:param name="count" value="11" />
+            </s:url>
+            <a href="${jumpHomeByPathParams}">通过路径参数跳转值home.jsp</a></br>
+            <span>将URL转义成html字符串输出<s:url value="/home/getFormParams" htmlEscape="true" /></span></br>
+        </body>
+        </html>
+        ```
+        * 转义内容:使用标签<s:escapebody>，包含内容即转义，属性htmlEscape转义成html字符输出，javaScriptEscape转义成js字符输出
+        ```
+        <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+        <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
+        <body>
+            <s:url value="/home/getFormParams" javaScriptEscape="true" var="jsEscape"/>
+            <button id="jsEscapeBtn" type="submit" onclick="show()">将URL转义成js字符串弹框输出</button></br>
+        <script type="text/javascript">
+            function show(){
+              var jsEscape = "${jsEscape}";
+              alert("${jsEscape}");
+            }
+        </script>
+        <h3>转义内容应用</h3>
+        <s:escapeBody htmlEscape="true">
+        <span>将URL转义成html字符串输出</span>
+        </s:escapeBody></br>
+        <s:escapeBody javaScriptEscape="true">
+            <span>将URL转义成js字符串弹框输出</span>
+        </s:escapeBody>
+        </body>
+        </html>
+        ```
+
+* TilesViewResolver:
+* ThymeleafViewResolver:
