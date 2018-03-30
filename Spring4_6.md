@@ -269,5 +269,69 @@ public interface View{
   ```
 * ThymeleafViewResolver:
   * 配置：
-  * 解析过程：
+  ```
+  //JavaConfig
+  @Bean
+  public ViewResolver viewResolver(
+    SpringTemplateEngine templateEngine) {    /*配置Thymeleaf视图解析器*/
+      ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+      viewResolver.setTemplateEngine(templateEngine);
+      viewResolver.setCharacterEncoding("utf-8");
+      return viewResolver;
+    }
+  @Bean
+  public SpringTemplateEngine templateEngine(
+    TemplateResolver templateResolver) {    /*配置模板引擎*/
+      SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+      templateEngine.setTemplateResolver(templateResolver);
+      return templateEngine;
+    }
+  @Bean
+  public TemplateResolver templateResolver() {    /*配置模板解析器*/
+    TemplateResolver templateResolver = new ServletContextTemplateResolver();
+    templateResolver.setPrefix("/WEB-INF/html/");
+    templateResolver.setSuffix(".html");
+    templateResolver.setTemplateMode("HTML5");
+    templateResolver.setCharacterEncoding("utf-8");
+    return templateResolver;
+  }
+  ```
+  ```
+  <!-- XML -->
+  <bean id="viewResolver"
+      class="org.thymeleaf.spring3.view.ThymeleafViewResolver"
+      p:templateEngine-ref="templateEngine"
+      p:characterEncoding="UTF-8"/>
+  <bean id="templateEngine"
+      class="org.thymeleaf.spring3.SpringTemplateEngine"
+      p:templateResolver-ref="templateResolver" />
+  <bean id="templateResolver"
+      class="org.thymeleaf.templateresolver.ServletContextTemplateResolver"
+      p:prefix="/WEB-INF/html/"
+      p:suffix=".html"
+      p:templateMode="HTML5" />
+  ```
+  * 解析过程：视图解析器将逻辑视图名称与设定前后缀拼接成web内部资源路径，从该路径返回视图，最后DispatcherServlet将模型传至视图进行渲染（启动模板引擎使用模板解析器解析）。
   * 渲染：
+  ```
+  <html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+  <title>Thymeleaf应用</title>
+  </head>
+  <body>
+      <h1>Thymeleaf应用</h1>
+      <a th:href="@{/home/showTestPage}" >跳转至测试页面</a>
+      <form th:action="@{/home/getFormParams}" method="POST" th:object="${params}">
+             id:<input type="text" th:field="*{id}" /><br/>
+             message:<input type="text" th:field="*{message}"  /><br/>
+             time:<input type="text" th:field="*{time}"  /><br/>
+             <input type="submit" value="commit" />
+      </form>
+  </body>
+  </html>
+  ```
+  * Jsp与Thymeleaf区别
+    * Jsp并不是真正的HTML，Jsp标签库的使用造成HTML代码污染，而Thymeleaf支持原生HTML元素，使用命名空间方式加以支持。
+    * Jsp依赖Servlet，而Thymeleaf能够独立于Servlet使用。
+    * 使用[Thymeleaf](https://www.thymeleaf.org/index.html)需要学习[Sring方言](https://blog.csdn.net/zrk1000/article/details/72667478)。
