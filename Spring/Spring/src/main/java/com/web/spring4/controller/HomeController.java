@@ -39,7 +39,8 @@ public class HomeController {
 	}
 
 	@RequestMapping(value={"/show"},method=RequestMethod.GET)
-	public String showHomePage(){
+	public String showHomePage(Map model){
+		model.put("params", new Data("","",""));
 		return "home";
 	}
 	
@@ -82,5 +83,32 @@ public class HomeController {
 		}
 		model.put("params",data);
 		return "home";
+	}
+	
+	@RequestMapping(value={"/showFormbindtagRespo"},method=RequestMethod.GET)
+	public String showFormBindTagRespoPage(Map model){
+		model.put("params", new Data("","",""));
+		return "formbindtagrespo";
+	}
+	
+	@RequestMapping(value={"/getFormParamsByFormBindTagRespo"},method=RequestMethod.POST)
+	public String getFormParamsByFormBindTagRespo(Map model,@Valid Data data,Errors errors){
+		System.out.println(errors.hasErrors());
+		if(errors.hasErrors()){
+			System.out.print("----------");
+			return "index";
+		}
+		model.put("params",data);
+		return "formbindtagrespo";
+	}
+	
+	@RequestMapping(value={"/showUniversalTagRespo"},method=RequestMethod.GET)
+	public String showUniversalTagRespoPage(Map model){
+		return "universaltagrespo";
+	}
+	
+	@RequestMapping(value={"/showTestPage"},method=RequestMethod.GET)
+	public String showTestPage(Map model){
+		return "test";
 	}
 }
