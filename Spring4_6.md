@@ -207,4 +207,67 @@ public interface View{
         ```
 
 * TilesViewResolver:
+  * 配置：
+  ```
+  //JavaConfig
+  @Bean
+  public ViewResolver viewResolver(){    /*配置Tiles视图解析器*/
+    return new TilesViewResolver();
+  }
+  @Bean
+  public TilesConfigurer tilesConfigurer(){    /*配置解析tiles定义*/
+    TilesConfigurer tiles = new TilesConfigurer();
+    tiles.setDefinitions(new String[]{"WEB-INF/layout/tiles.xml"});
+    tiles.setCheckRefresh(true);
+    return tiles;
+  }
+  ```
+  ```
+  <!-- XML -->
+  <bean id="viewResolver" class=
+      "org.springframework.web.servlet.view.tiles3.TilesViewResolver" />
+  <bean id="tilesConfigurer" class=
+    "org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+      <property name="definitions">
+          <list>
+              <value>/WEB-INF/layout/tiles.xml.xml</value>
+          </list>
+      </property>
+  </bean>
+  ```
+  ```
+  定义Tiles
+  ```
+  ```
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE tiles-definitions PUBLIC
+          "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+          "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+  <tiles-definitions>
+      <definition name="home" template="/WEB-INF/jsp/page.jsp">
+          <put-attribute name="header" value="/WEB-INF/jsp/header.jsp" />
+          <put-attribute name="body" value="/WEB-INF/jsp/home.jsp"/>
+          <put-attribute name="footer" value="/WEB-INF/jsp/footer.jsp"/>
+      </definition>
+  </tiles-definitions>
+  ```
+  * 解析过程：视图解析器将逻辑视图名称与所有tiles定义文件中的definition的name相匹配，返回相应的视图模板，最后DispatcherServlet将模型传至视图模板进行渲染。
+  * 渲染技术：使用标签<t>将多个模板组合成一个视图（可做模板，可使用extends属性扩展模板）
+  ```
+  <%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+  <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+  <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="t"%>
+  <html>
+  <body>
+      <h2>Hello World! -- page.jsp</h2>
+      <div><t:insertAttribute name="header"/></div>
+      <div><t:insertAttribute name="body"/></div>
+      <div><t:insertAttribute name="footer"/></div>
+  </body>
+  </html>
+  ```
 * ThymeleafViewResolver:
+  * 配置：
+  * 解析过程：
+  * 渲染：
