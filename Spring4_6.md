@@ -21,7 +21,7 @@ public interface View{
 | -------- | ----- |
 | BeanNameViewResolver | 将视图解析为Spring应用上下文的bean定义，视图名与bean id 相匹配 |
 | ContentNegotiatingViewResolver | 将视图解析任务委托给另一个能够产生客户端需要的内容类型的视图解析器 |
-| FreeMarkerViewResolver | 将视图解析为[FreeMark模板]定义(http://freemarker.foofun.cn/)，视图名与HTML名相匹配 |
+| FreeMarkerViewResolver | 将视图解析为[FreeMark模板](http://freemarker.foofun.cn/)定义，视图名与HTML名相匹配 |
 | InternalResourceViewResolver | 将视图解析为Web应用的内部资源（一般为JSP）定义，视图名与JSP名相匹配 |
 | JasperReportsViewResolver | 将视图解析为[JasperReports](https://www.yiibai.com/jasper_reports/)定义 ,视图名与报表视图配置上的bean id 相匹配|
 | ResourceBundleViewResolver | 将视图解析为ResourceBundle定义，通过属性文件解析视图，视图名与JSP名相匹配 |
