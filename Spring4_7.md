@@ -589,10 +589,10 @@ public class ServletInitializer implements WebApplicationInitializer{
   model.addAttribute("max", "2018");
   model.addAttribute("count", "2018");
   return "redirect:/home/getQueryParams?max=2018&count=2018";
-//return "redirect:/home/getQueryParams?max={max}&count={count}";
-//return "redirect:/home/getPathParams/2018/2018";
-//return "redirect:/home/getPathParams/{max}/{count}";
- }
+  //return "redirect:/home/getQueryParams?max={max}&count={count}";
+  //return "redirect:/home/getPathParams/2018/2018";
+  //return "redirect:/home/getPathParams/{max}/{count}";
+  }
   ```
   * PS:建议使用占位符，因为不安全的字符都会经过转义，保持字符原义。
 * 使用flash属性（传递复杂参数，如对象）
