@@ -572,12 +572,12 @@ public class ServletInitializer implements WebApplicationInitializer{
 		System.out.println("acceptUpLoadFile exception happened 0.0");
 		return "redirect:/home/showUpLoadFilePage";
   }
-}
+  }
   ```
 
 #### 跨重定向参数传递
-* 重定向
 
+* 重定向
 [![捕获.PNG](https://i.loli.net/2018/04/13/5ad079516fbf8.png)](https://i.loli.net/2018/04/13/5ad079516fbf8.png)
 
 * 使用URL模板（传递简单文本参数）
