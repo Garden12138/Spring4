@@ -441,7 +441,173 @@ public class ServletInitializer implements WebApplicationInitializer{
 ```
 
 #### 处理文件上传
-
+* 了解multipart请求数据：[multipart请求](https://blog.csdn.net/hbtj_1216/article/details/52836776)数据会将一个表单拆分为多部分，每个部分对应一个输入域。
+[![20180403224745.png](https://i.loli.net/2018/04/03/5ac394390904c.png)](https://i.loli.net/2018/04/03/5ac394390904c.png)
+* 配置multipart解析器
+  * 使用StandardServletMultipartResolver，依赖于Servlet3.0
+    * 若使用Servlet初始化方式配置DispatcherServlet
+    ```
+    //WebApplicationInitializer的实现类中的onStartup(ServletContext servletContext)方法
+    DispatcherServlet ds = new DispatcherServlet();
+    Dynamic registration = servletContext.addServlet("appServlet", ds);
+    registration.addMapping("/");
+    registration.setMultipartConfig(new MultipartConfigElement("/tmp/spittr/uploads"));
+    ```
+    * 若使用AbstractAnnotationConfigDispatcherServletInitializer方式配置DispatcherServlet
+    ```
+    //AbstractAnnotationConfigDispatcherServletInitializer的实现类中
+    /*基于Servlet3.0的multipart请求解析器具体配置*/
+    @Override
+    protected void customizeRegistration(Dynamic registration){
+      registration.setMultipartConfig(new MultipartConfigElement("",2097152,4194304,0));
+      /*参数：存放文件临时路径，上传文件的文件大小，请求的最大容量，最大内存大小*/
+    }
+    ```
+    ```
+    //WebConfig.java
+    @Bean
+    public MultipartResolver multipartResolver() throws IOException{/*基于Servlet3.0的multipart请求解析器配置*/
+      return new StandardServletMultipartResolver();
+    }
+    ```
+    * 若使用web.xml方式配置DispatcherServlet
+    ```
+    <servlet>
+    <servlet-name>appServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+    <multipart-config>
+        <location>/tmp/spittr/uploads</location>
+        <max-file-size>2097152</max-file-size>
+        <max-request-size>4194304</max-request-size>
+    </multipart-config>
+    </servlet>
+    ```
+  * 使用CommonsMultipartResolver，依赖于Jakarta Commons FileUpload
+  ```
+  //WebConfig.java
+  @Bean
+  public MultipartResolver multipartResolver() throws IOException{/*基于Jakarta Commons FileUpload的multipart请求解析器配置*/
+    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+    multipartResolver.setUploadTempDir(new FileSystemResource(""));
+    multipartResolver.setMaxUploadSize(2097152);
+    multipartResolver.setMaxInMemorySize(0);
+    return multipartResolver;
+  }
+  ```
+* 接收multipart数据
+  * 使用byte[]接收
+  ```
+  @RequestMapping(value="/register", method=POST)
+  public String processRegistration(@RequestPart("profilePicture") byte[] profilePicture,@Valid Spitter spitter,Errors errors) {
+    ...
+    //byte[]转化为可存储文件
+  }
+  ```
+    * [byte[]转化为可存储文件]()
+  * 使用MultipartFile接收
+  ```
+  @RequestMapping(value="/register", method=POST)
+  public String processRegistration(@RequestPart("profilePicture") MultipartFile multipartfile,@Valid Spitter spitter,Errors errors) {
+    ...
+    //MultipartFile api
+  }
+  ```
+    * [MultipartFile api]()
+  * 使用Part接收
+  ```
+  @RequestMapping(value="/register", method=POST)
+  public String processRegistration(@RequestPart("profilePicture") Part part,@Valid Spitter spitter,Errors errors) {
+    ...
+    //Part api
+  }
+  ```
+    * [Part api]()
 #### 控制器处理异常
+* Spring提供将异常转化为响应的方式：
+  * 特定的Spring异常将自动映射为指定的HTTP状态码。
+  * 其他异常可使用@ResponseStatus手动映射为指定的HTTP状态码。
+  ```
+  package com.web.spring4.exception;
+  import org.springframework.http.HttpStatus;
+  import org.springframework.web.bind.annotation.ResponseStatus;
+  @ResponseStatus(value=HttpStatus.FORBIDDEN,reason="server is busy =.=")
+  public class NoSuchMethodException extends RuntimeException{
+  }
+  ```
+  * 可使用@ExceptionHandler在方法上处理本控制器的异常。
+  ```
+  @ExceptionHandler(NoSuchMethodException.class)
+  public String handleAcceptUpLoadFile(){
+    System.out.println("acceptUpLoadFile exception happened 0.0");
+    return "uploadfile";
+  }
+  ```
+* 处理方式：
+  * 新建HandlerController，编写所有控制器可能出现的异常处理，其他控制器继承该控制器。
+  ```
+  public class HandlerController{
+    @ExceptionHandler(NoSuchMethodException.class)
+    public String handleAcceptUpLoadFile(){
+      System.out.println("acceptUpLoadFile exception happened 0.0");
+      return "uploadfile";
+    }
+  }
+  ```
+  ```
+  @Controller
+  public class TestController extends HandlerController{
+    ...
+  }
+  ```
+  * 使用注解@ControllerAdvice（已使用@Component，需与@Controller一起扫描），为所有控制器添加异常处理通知
+  ```
+  package com.web.spring4.handler;
+  import org.springframework.web.bind.annotation.ControllerAdvice;
+  import org.springframework.web.bind.annotation.ExceptionHandler;
+  @ControllerAdvice
+  public class HomeControllerHandler {
+	@ExceptionHandler(NoSuchMethodException.class)
+	public String handleAcceptUpLoadFile(){
+		System.out.println("acceptUpLoadFile exception happened 0.0");
+		return "redirect:/home/showUpLoadFilePage";
+  }
+}
+  ```
 
 #### 跨重定向参数传递
+* 重定向 
+[![捕获.PNG](https://i.loli.net/2018/04/13/5ad079516fbf8.png)](https://i.loli.net/2018/04/13/5ad079516fbf8.png)
+
+* 使用URL模板（传递简单文本参数）
+  * 使用字符串拼接URL
+  * 使用占位符拼接URL
+  ```
+  @RequestMapping(value={"/showRedirect"},method=RequestMethod.GET)
+  public String showRedirect(Model model){
+  model.addAttribute("max", "2018");
+  model.addAttribute("count", "2018");
+  return "redirect:/home/getQueryParams?max=2018&count=2018";
+//return "redirect:/home/getQueryParams?max={max}&count={count}";
+//return "redirect:/home/getPathParams/2018/2018";
+//return "redirect:/home/getPathParams/{max}/{count}";
+ }
+  ```
+  * PS:建议使用占位符，因为不安全的字符都会经过转义，保持字符原义。
+* 使用flash属性（传递复杂参数，如对象）
+```
+@RequestMapping(value={"/showRedirect"},method=RequestMethod.GET)
+public String showRedirect(RedirectAttributes model){
+  model2.addFlashAttribute("data",new Data("223","223","223"));
+  return "redirect:/home/getFormParams";
+}
+```
+```
+//参数接收
+@RequestMapping(value={"/getFormParams"},method=RequestMethod.GET)
+public String getFormParams(Model model){
+  System.out.println(model.containsAttribute("data"));
+  System.out.println(model.asMap().get("data"));
+  return "home";
+}
+```
