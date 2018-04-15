@@ -99,3 +99,44 @@
         * View：进入视图状态是创建，于退出视图状态时销毁。只有视图状态内是可见的。
 
 #### 配置Spring Web Flow
+
+* Spring Web Flow构建于Spring MVC基础之上，故需在Spring应用上下文中配置bean来处理流程请求并执行流程。因Spring Web Flow目前不支持JavaConfig，故只能基于XML配置。
+* 步骤：
+  * 于定义Spring应用上下文配置文件声明Spring Web Flow命名空间
+  ```
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:flow="http://www.springframework.org/schema/webflow-config"
+   xmlns:p="http://www.springframework.org/schema/p"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xsi:schemaLocation="http://www.springframework.org/schema/webflow-config
+   http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.3.xsd
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+  ```
+  * 装配流程执行器：流程执行器，驱动流程的执行。当用户进入一个流程石，流程执行器为用户创建并启动一个流程执行实例。
+  ```
+  <flow:flow-executor id="flowExecutor" />
+  ```
+  * 配置流程注册表：流程注册表，加载流程定义并让流程执行器能够使用他们。
+  ```
+  <flow:flow-registry id="flowRegistry" base-path="/WEB-INF/flows">
+      <flow:flow-location-pattern value="/**/*-flow.xml" />
+  </flow:flow-registry>
+  ```
+  * 配置流程请求处理：FlowHandlerMapping帮助DispatcherServlet将请求发送至Spring Web Flow
+  ```
+  <bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping">
+      <property name="flowRegistry" ref="flowRegistry" />
+  </bean>
+  ```
+  * 配置流程响应处理：FlowHandlerAdapter，响应发送的流程请求并对其进行处理。
+  ```
+  <bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
+      <property name="flowExecutor" ref="flowExecutor" />
+  </bean>
+  ```
+* [具体Demo参考]()
