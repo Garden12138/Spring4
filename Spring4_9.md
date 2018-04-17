@@ -201,6 +201,7 @@ public class SecurityWebInitializer extends AbstractSecurityWebApplicationInitia
         .autMatchers("spitters/me")
          .access("hasRole('ROLE_USER') and hasIpAddress('192.168.1.2')");
         ```
+        
     * 配置登录页面：若重载configure(HttpSecurity http)方法，需重新启用默认登录页面。若需自定义登录页面，则可以参考默认登陆页面源码，编写自定义登录页面(需注意表单提交URL)。
     ```
     @Override
