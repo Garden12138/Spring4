@@ -168,7 +168,7 @@ public class SecurityWebInitializer extends AbstractSecurityWebApplicationInitia
      //.antMatchers("/spitter/form").requiresInSecure();  //不需https    
     }
     ```
-
+    * _
       * 保护URL配置方法
         * access(String)：参数为SpEL表达式，若结果为true则允许访问。
         * anonymous()：允许匿名用户访问。
@@ -201,7 +201,6 @@ public class SecurityWebInitializer extends AbstractSecurityWebApplicationInitia
         .autMatchers("spitters/me")
          .access("hasRole('ROLE_USER') and hasIpAddress('192.168.1.2')");
         ```
-        
     * 配置登录页面：若重载configure(HttpSecurity http)方法，需重新启用默认登录页面。若需自定义登录页面，则可以参考默认登陆页面源码，编写自定义登录页面(需注意表单提交URL)。
     ```
     @Override
