@@ -154,5 +154,25 @@
   * [使用Profile选择数据源](https://github.com/Garden12138/Spring4/blob/master/Spring4_3.md)
 
 #### Spring集成JDBC的数据访问
-
+* JDBC建立于SQL基础之上，能够更好地对数据访问的性能进行调优。使用JDBC包括使用原生JDBC和模板JDBC，原生JDBC职责不专一，除了进行数据访问还需负责管理事务与资源，处理异常等任务，故不建议使用。
+* 使用模板JDBC：Spring的JDBC框架承担了资源管理和异常的工作，我们只需关心从数据库读写数据的代码。
+  * JdbcTemplate：支持简单的JDBC数据库访问功能以及基于索引参数的查询。
+  * NamedParameterJdbcTemplate：支持简单的JDBC数据库访问功能以及基于参数命名方式的查询。
+* Demo：[JdbcTemplate API](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html)
+```
+//Spring应用上下文
+@Bean
+public JdbcTemplate jdbcTemplate(DataSource dataSource){
+  return new JdbcTemplate(dataSource);
+}
+```
+```
+//Repository|dao层
+@Repository
+public class JdbcRepositoryImpl implements JdbcRepository{
+  @Autowired
+  private JdbcOperations jdbcOperations;    //JdbcOperations实现JdbcTemplate所有操作。
+  ...  
+}
+```
 #### Spring集成ORM的数据访问
