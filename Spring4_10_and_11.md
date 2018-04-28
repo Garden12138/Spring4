@@ -176,3 +176,173 @@ public class JdbcRepositoryImpl implements JdbcRepository{
 }
 ```
 #### Spring集成ORM的数据访问
+* ORM，object-relational mapping，即对象-关系映射，将对象的属性映射关系型数据库表的列，并且自动生成sql语句，具有延迟加载，懒加载以及级联特性。Spring对ORM框架的支持有Hibernate，iBATIS,JDO,JPA等，为这些框架提供附加的服务包括支持集成Spring声明式事务，透明的异常处理，线程安全轻量级的模板类，DAO支持类以及资源管理。
+* 在Spring中集成Hibernate
+  * 准备：Hibernate SessionFactoryBean（Spring中用于获取Hibernate SessionFactory的Bean）->Hibernate SessionFactory（该接口提供了获取，打开，关闭以及管理Hibernate Session功能）->Hibernate Session（该接口提供基本数据的访问功能）->Hibernate
+  * 步骤：
+    * 于Spring应用上下文中配置Hibernate SessionFactoryBean
+    ```
+    //hibernate3支持xml配置
+    @Bean
+    public LocalSessionFactoryBean sessionFactory(DataSource dataSource){
+      LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+      lsfb.setDataSource(dataSource);
+      lsfb.setMappingResources(new String[]{"Spitter.hbm.xml"});
+      Properties props = new Properties();
+      props.setProperty("dialect","org.hibernate.dialect.H2Dialect");
+      lsfb.setHibernateProperties("props");
+      return lsfb;
+    }
+    //hibernate3支持annotation配置
+    @Bean
+    public AnnotationSessionFactoryBean sessionFactory(DataSource dataSource){
+      AnnotationSessionFactoryBean asfb = new AnnotationSessionFactoryBean();
+      asfb.setDataSource(dataSource);
+      asfb.setPackagesToScan(new String[]{"com.web.spring4.entity"});
+      Properties props = new Properties();
+      props.setProperty("dialect","org.hibernate.dialect.H2Dialect");
+      asfb.setHibernateProperties("props");
+      return asfb;
+    }
+    //hibernate4-支持xml和annotation配置
+    @Bean
+    public LocalSessionFactoryBean sessionFactory(DataSource dataSource){
+      LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+      lsfb.setDataSource(dataSource);//装配数据源
+      lsfb.setMappingResources(new String[]{"Spitter.hbm.xml"});//装配映射配置文件
+      //lsfb.setPackagesToScan(new String[]{"com.web.spring4.entity"});//扫描带有@Entity与@MappedSuperClass的实体类
+      Properties props = new Properties();
+      props.setProperty("dialect","org.hibernate.dialect.H2Dialect");
+      lsfb.setHibernateProperties("props");//装配细节配置
+      return lsfb;
+    }
+    ```
+    * 构建不依赖Spring的Repository：不使用HibernateTemplate（HibernateTemplate保证每个事务使用同个session，使Repository的实现与Spring耦合），而是使用上下文[Session](http://docs.jboss.org/hibernate/orm/3.2/api/org/hibernate/Session.html)。
+    ```
+    //Repository|dao层
+    @Repository
+    public class HibernateRepositoryImpl implements HibernateRepository{
+      @Autowired
+      private SessionFactory sessionFactory;    
+      private Session currentSession(){
+        return sessionFactory.getCurrentSession();
+      }
+      public void save(Spitter spitter){
+        currentSession.save(spitter);
+      }
+      ...
+    }
+    ```
+    * 添加异常转换功能：若使用Hibernate上下文Session而不是Hibernate模板的时候，需将Hibernate的异常处理转交给Spring统一处理。
+    ```
+    @Bean
+    public BeanPostProcessor persistenceTranslation(){
+      return new PersistenceExceptionTranslationPostProcessor();
+      //PersistenceExceptionTranslationPostProcessor是一个bean后置处理器，为所有带有@Repository注解的类添加一个通知器，用于统一处理数据访问异常。
+    }
+    ```
+* 在Spring中集成JPA
+  * 准备：EntityManagerFactoryBean（Spring中获取EntityManagerFactory的Bean）->EntityManagerFactory（获取EntityManager实例）->EntityManager（应用程序类型的实体管理器或容器类型的实体管理器）->JPA（Java Persistence API）
+  * 步骤：
+    * 于Spring应用上下文中配置实体管理器工厂
+    ```
+    -- 生产应用程序类型的实体管理器工厂
+    //persistence.xml配置数据源，放置META-INF目录下
+    <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+        <persistence-unit name="SpitterPU">
+            <!-- 全限定实体类名 -->
+            <class>com.web.spring4.entity.Spitter</class>
+            <!-- 数据源 -->
+            <properties>
+                <property name="toplink.jdbc.driver" value="org.hsqldb.jdbcDriver" />
+                <property name="toplink.jdbc.url" value="jdbc:hsqldb:hsql://localhost/spring4" />
+                <property name="toplink.jdbc.user" value="garden" />
+                <property name="toplink.jdbc.password" value="org.hsqldb.garden" />
+            </properties>
+        </<persistence-unit>
+    </persistence>
+    //配置实体管理器工厂
+    @Bean
+    public LocalEntityManagerFactoryBean entityManagerFactoryBean(){
+      LocalEntityManagerFactoryBean lemfb = new LocalEntityManagerFactoryBean();
+      lemfb.setPersistenceUnitName("SpitterPU");//配置数据源，persistence.xml中持久话单元名称。
+    }
+    ```
+    ```
+    -- 生产容器类型的实体管理器工厂
+    //配置JPA具体实现
+    @Bean
+    public JpaVendorAdapter jpaVendorAdapter(){
+      HibernateJpaVendorAdpater adapter = new HibernateJpaVendorAdpater();
+      adapter.setDataBase("HSQL");
+      adapter.setShowSql("true");
+      adapter.setGenerateDdl(false);
+      adapter.setDatabasePlatform("org.hibernate.dialect.HSQLDialect");
+      return adapter;
+    }
+    //配置实体管理器工厂
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean(){
+      LocalContainerEntityManagerFactoryBean lcemfb = new LocalContainerEntityManagerFactoryBean();
+      lcemfb.setDataSource(dataSource);//配置数据源
+      lcemfb.setJpaVendorAdapter(jpaVendorAdapter);//指明具体JPA实现
+      lcemfb.setPackagesToScan("com.web.spring4.entity");//扫描实体
+    }
+    ```
+    * 编写基于JPA的Repository：[EntityManager](https://blog.csdn.net/fly910905/article/details/78600251?locationNum=4&fps=1)
+    ```
+    //Repository|dao层
+    @Repository
+    @Transactional
+    public class SpitterRepositoryImpl implements SpitterSweeper{
+      //@PersistenceUnit
+      //private EntityManagerFactory emf;
+      //public void addSpitter(Spitter spitter){
+      //  emf.createEntityManager().persist(spitter);
+      //}
+      @PersistenceContext
+      private EntityManager em;//注入EntityManager代理，真正的EntityManager与当前事务绑定
+      public void addSpitter(Spitter spitter){
+        em.persist(spitter);
+      }
+      ...
+    }
+    ```
+    ```
+    //若无启用JPA注解如<context:annotation-config>或<context:component-scan>，则需注册
+    @Bean
+    public PersistenceAnnotationBeanPostProcessor paPostProcessor(){
+      return new PersistenceAnnotationBeanPostProcessor();
+    }
+    ```
+    * 添加异常转换功能：若使用Hibernate上下文Session而不是Hibernate模板的时候，需将Hibernate的异常处理转交给Spring统一处理。
+    ```
+    @Bean
+    public BeanPostProcessor persistenceTranslation(){
+      return new PersistenceExceptionTranslationPostProcessor();
+      //PersistenceExceptionTranslationPostProcessor是一个bean后置处理器，为所有带有@Repository注解的类添加一个通知器，用于统一处理数据访问异常。
+    }
+    ```
+  * 借助[Spring Data实现自动化的JPA](https://www.oschina.net/translate/getting-started-with-spring-data-jpa?cmp) Repository
+    * 于Spring应用上下文启动Spring Data JPA
+    ```
+    -- 扫描查找扩展Spring Data JPA的所有repository接口并自动实现
+    <!-- xml -->
+    <jpa:repositories base-package="com.web.spring4.dao" repository-impl-postfix="Helper" />
+    //JavaConfig
+    @Configuration
+    @EnableJpaRepositories(basePackages="com.web.spring4.dao",repositoryImplementationPostfix="Helper")
+    public class JpaConfiguration{
+      ...
+    }
+    ```
+    * 借助Spring Data，以接口形式创建Repository
+    ```
+    public interface SpitterRepository extends JpaRepository<Spitter,Long>,SpitterSweeper{
+      public Spitter findByUsername(String username);//定义自动查询方法，根据方法名中的动词，主题，By以及断言自动生成查询语句
+      @Query("select s from Spitter s where s.email like '%@mail.com'")/定义自定义查询方法
+      public List<Spitter> findAllMailSpitters();
+      //混合自定义：自动合并接口名+Impl后缀的实现方法，如SpitterRepositoryImpl。可选择修改后缀（repository-impl-postfix="Helper"或repositoryImplementationPostfix="Helper"）
+    }
+    ```
+    * [Demo](https://www.ibm.com/developerworks/cn/opensource/os-cn-spring-jpa/index.html)
