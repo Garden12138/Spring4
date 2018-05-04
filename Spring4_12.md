@@ -87,7 +87,7 @@
   public interface OrderOperations {
     List<Order> findOrdersByType(String
       @Override
-      public List<Order> findOrdersByType(String type););
+      public List<Order> findOrdersByType(String type);
   }
   ```
   ```
