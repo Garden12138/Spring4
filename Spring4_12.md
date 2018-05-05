@@ -73,6 +73,7 @@
   ```
   * 编写MongoDB Repository：Repository接口拓展MongoRepository，继承基本的CRUD操作；自动合并以Impl为后缀的Repository的实现方法。
   ```
+  @Repository
   public interface OrderRepository extends MongoRepository<Order, String>,OrderOperations {/*Order为带有@Document注解的对象类型，String为带有@Id的属性类型*/
     //根据Spring Data方法名命名约束添加自定义操作
       List<Order> findByCustomer(String customer);
@@ -178,6 +179,7 @@
   ```
   * 编写Neo4j Repository：Repository接口拓展GraphRepository，继承基本的CRUD操作；自动合并以Impl为后缀的Repository的实现方法。
   ```
+  @Repository
   public interface OrderRepository extends GraphRepository<Order> extends OrderOperations{
     //根据Spring Data方法名命名约束添加自定义操作
     List<Order> findByCustomer(String customer);
@@ -207,4 +209,39 @@
     }
   ```
 
-#### 集成使用Redis持久化key-value数据
+#### 集成使用[Redis](https://redis.io/)持久化key-value数据
+* key-value数据：以键值对形式存储的数据
+* Spring Data Redis对Spring应用中的Redis的支持：
+  * 支持基于RedisTemplate模板的数据访问
+* 集成使用（[快速集成](http://projects.spring.io/spring-data-redis/)|[详细文档](https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/)）
+  * 启用Redis
+  ```
+  @Configuration
+  public class RedisConfig {
+    //RedisTemplate模板配置
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
+      RedisTemplate<String, Object> redis = new RedisTemplate<String, Object>();
+      redis.setConnectionFactory(cf);
+      return redis;
+    }
+    //连接Redis配置
+    @Bean
+    public RedisConnectionFactory redisCF() {
+      JedisConnectionFactory cf = new JedisConnectionFactory();
+      cf.setHostName("redis-server");
+      cf.setPort(7379);
+      cf.setPassword("foobared");
+      return cf;
+    }
+  }
+  ```
+  * 编写Repository：[RedisTemplate API](https://docs.spring.io/spring-data/data-redis/docs/current/api/org/springframework/data/redis/core/RedisTemplate.html)
+  ```
+  @Repository
+  public class OrderRepositoryImpl implements OrderRepository {
+    @Autowired
+    private RedisTemplate redis;
+    ...
+    }
+  ```
