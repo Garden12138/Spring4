@@ -4,17 +4,17 @@
 
 #### 了解Spring Data 对[NoSQL](http://www.runoob.com/mongodb/nosql.html)的支持
 * 支持的NoSQL数据库：MongoDB，Neo4j，Redis。
-  * 支持自动化生成Repository实现的功能
+  * 支持运行时自动化生成Repository实现的功能
   * 支持基于模板的数据访问
   * 支持注解映射对象
 
 #### 集成使用[MongoDB](https://www.mongodb.com/)持久化文档数据
 * 文档数据：将数据信息收集到一个非规范化（文档）的结构中并且相互独立，以此方式存储的数据称为文档数据。适用于不具有丰富关联关系的数据。
 * Spring Data MongoDB对Spring应用中的MongoDB的支持：
-  * 支持自动化生成Repository实现的功能
+  * 支持运行时自动化生成Repository实现的功能
   * 支持基于MongoTemplate模板的数据访问
   * 支持注解映射对象-文档关系
-* 集成使用：
+* 集成使用（[快速集成](https://projects.spring.io/spring-data-mongodb/)|[详细文档](http://docs.spring.io/spring-data/mongodb/docs/current/reference/html/)）：
   * 启用MongoDB
   ```
   @Configuration
@@ -103,6 +103,108 @@
     }
   }
   ```
-#### 集成使用Neo4j持久化图数据
+
+#### 集成使用[Neo4j](https://neo4j.com/)持久化图数据
+* 图数据：存储到多个细粒度的节点中并且节点之间可以通过关系建立关联的数据。
+* Spring Data Neo4j对Spring应用中的Neo4j的支持：
+  * 支持运行时自动化生成Repository实现的功能
+  * 支持基于Neo4jTemplate模板的数据访问
+  * 支持注解映射对象-图（节点与关联）关系
+* 集成使用（[快速集成](https://projects.spring.io/spring-data-neo4j/#quick-start)|[详细文档](https://docs.spring.io/spring-data/neo4j/docs/current/reference/html/)）：
+  * 启用Neo4j
+  ```
+  @Configuration
+  @EnableNeo4jRepositories(basePackages = "orders.db")/*启用运行时自动化生成Repository实现的功能*/
+  public class Neo4jConfig extends Neo4jConfiguration {
+    //扩展Neo4jConfiguration隐示创建Neo4jTemplate
+    public Neo4jConfig() {    /*设置扫描的模型的基础包包名*/
+      setBasePackage("orders");
+    }
+    //数据库访问
+    @Bean(destroyMethod="shutdown")
+    public GraphDatabaseService graphDatabaseService(Environment env) {
+      //return new GraphDatabaseFactory().newEmbeddedDatabase("/tmp/graphdb");/*配置嵌入式数据库*/
+      return new SpringRestGraphDatabase("http://graphdbserver:7474/db/data",
+                                         env.getProperty("db.username"),
+                                         env.getProperty("db.password"));
+    }
+  }
+  ```
+  * 为Model添加[注解](https://docs.spring.io/spring-data/neo4j/docs/current/reference/html/#reference:annotating-entities)，实现Neo4j持久化（对象-图（节点与关联））
+  ```
+  @NodeEntity    /*声明Order类是节点*/
+  public class Order {
+    @GraphId    /*声明Graph ID*/
+    private Long id;
+    private String customer;
+    private String type;
+    @RelatedTo(type="HAS_ITEMS")    /*与条目的关联关系*/
+    private Set<Item> items = new LinkedHashSet<Item>();
+    public String getCustomer() {
+      return customer;
+    }
+    public void setCustomer(String customer) {
+      this.customer = customer;
+    }
+    public String getType() {
+      return type;
+    }
+    public void setType(String type) {
+      this.type = type;
+    }
+    public Collection<Item> getItems() {
+      return items;
+    }
+    public void setItems(Set<Item> items) {
+      this.items = items;
+    }
+    public Long getId() {
+      return id;
+    }
+  }
+  ```
+  ```
+  @RelationshipEntity(type="HAS_LINE_ITEM_FOR")/*声明关联关系*/
+  public class LineItem {
+    @GraphId    /*声明Graph ID*/
+    private Long id;
+    @StartNode /*声明开始结点*/
+    private Order order;
+    @EndNode  /*声明结束结点*/
+    private Product product;
+    private int quantity;
+    ...
+  }
+  ```
+  * 编写Neo4j Repository：Repository接口拓展GraphRepository，继承基本的CRUD操作；自动合并以Impl为后缀的Repository的实现方法。
+  ```
+  public interface OrderRepository extends GraphRepository<Order> extends OrderOperations{
+    //根据Spring Data方法名命名约束添加自定义操作
+    List<Order> findByCustomer(String customer);
+    List<Order> findByCustomerLike(String customer);
+    List<Order> findByCustomerAndType(String customer, String type);
+    List<Order> getByType(String type);
+    @Query("{customer:'Chuck Wagon'}")/*Cypher查询参数*/
+    List<Order> findChucksOrders();
+  }
+  ```
+  ```
+  public interface OrderOperations {
+    List<Order> findSiAOrders();
+  }
+  ```
+  ```
+  public class OrderRepositoryImpl implements OrderOperations {
+    @Autowired
+    private Neo4jOperations neo4j; /*注入Neo4jOperations（实现Neo4jTemplate所有方法的接口）*/
+    public List<Order> findSiAOrders() {
+      Result<Map<String, Object>> result = neo4j.query(
+        "match (o:Order)-[:HAS_ITEMS]->(i:Item) " +
+        "where i.product='Spring in Action' return o",
+        EndResult<Order> endResult = result.to(Order.class);
+        return IteratorUtil.asList(endResult);
+      }
+    }
+  ```
 
 #### 集成使用Redis持久化key-value数据
