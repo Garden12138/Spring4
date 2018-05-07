@@ -7,7 +7,7 @@
   * 缓存：经常用于存储常用信息，每次需要时即可使用。
   * Spring对缓存的支持：Spring自身没有实现缓存的技术方案，但对其他流行的缓存实现提供支持。
 * 基于注解集成缓存
-  * 启用缓存：
+  * 启动缓存：
   ```
   @Configuration
   @EnableCaching    /*启用缓存（创建切面并触发Spring缓存注解的切点，通过切面操作缓存数据）*/
@@ -107,4 +107,38 @@
       ...  
     }
     ```
-* 基于XML声明集成缓存
+* 基于XML声明集成缓存:可以在没有源码的bean上应用缓存功能
+  * 启用缓存：使用切面实现将Spring注解与源码分离。Spring的aop与cache命名空间混合使用。
+  ```
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:cache="http://www.springframework.org/schema/cache"
+         xmlns:aop="http://www.springframework.org/schema/aop"
+         xsi:schemaLocation="http://www.springframework.org/schema/aop
+                             http://www.springframework.org/schema/aop/spring-aop.xsd
+                             http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans.xsd
+                             http://www.springframework.org/schema/cache
+                             http://www.springframework.org/schema/cache/spring-cache.xsd">
+  <!-- Caching configuration will go here -->
+  <!-- 启动缓存 -->
+  <cache:annotation-driven>
+  <!-- 将缓存通知绑定到一个切点上 -->
+  <aop:config>
+      <aop:advisor advice-ref="cacheAdvice"
+                   pointcut="execution(* com.habuma.spittr.db.SpittleRepository.*(..))"/>
+  </aop:config>
+  <!-- 配置缓存通知 -->
+  <cache:advice id="cacheAdvice">
+      <cache:caching>
+          <cache:cacheable cache="spittleCache" method="findRecent" />
+          <cache:cacheable cache="spittleCache" method="findOne" />
+          <cache:cacheable cache="spittleCache" method="findBySpitterId" />
+          <cache:cache-put cache="spittleCache" method="save" key="#result.id" />
+          <cache:cache-evic cache="spittleCache" method="remove" />
+      </cache:caching>
+  </cache:advice>
+  <bean id="cacheManager" class="org.springframework.cache.concurrent.ConcurrentMapCacheManager"/>
+  </beans>
+  ```
