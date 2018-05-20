@@ -9,7 +9,7 @@
 ```
 RPC模型            适用场景
 RMI                不考虑网络限制（防火墙），发布/访问基于Java服务
-Hessian|Burlap     考虑网络限制（防火墙），通过HTTP发布/访问基于Java服务。Hessian基于二进制，Burlap基于XML
+Hessian|Burlap     考虑网络限制（防火墙），通过HTTP发布/访问基于Java等服务（PHP，Python）。Hessian基于二进制，Burlap基于XML
 Http Invoker       考虑网络限制（防火墙），并希望使用基于XML或专有的序列化机制实现Java序列化时，发布/访问基于Spring的服务
 JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
 ```
@@ -29,7 +29,7 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
   ```
   //配置RMI服务导出器
   @Bean
-  public RmiServiceExporter rmiServiceExporter(SpitterService spitterService){
+  public RmiServiceExporter spitterServiceExporter(SpitterService spitterService){
     RmiServiceExporter rmiServiceExporter = new RmiServiceExporter();
     rmiServiceExporter.setService(spitterService);/*注入具体服务Bean*/
     rmiServiceExporter.setServiceName("SpitterService");/*设置服务名称*/
@@ -61,9 +61,97 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
   @Autowired
   private SpitterService SpitterService;
   ```
-  
-#### 发布和访问Hessian和Burlap服务
 
+#### 发布和访问Hessian和Burlap服务
+* 服务端发布Hessian服务
+  * 原理：
+
+  [![服务端发布Hessian-Burlap服务.png](https://i.loli.net/2018/05/20/5b0129eaa6d9a.png)](https://i.loli.net/2018/05/20/5b0129eaa6d9a.png)
+
+  * 配置
+  ```
+  //配置Hessian服务导出器
+  @Bean
+  public HessianServiceExporter spitterServiceExporter(SpitterService spitterService){
+    HessianServiceExporter hessianServiceExporter = new HessianServiceExporter();
+    hessianServiceExporter.setService(spitterService);
+    hessianServiceExporter.setServiceInterface(SpitterService.class);
+    return hessianServiceExporter;
+  }
+  ```
+  ```
+  //配置DispatcherServlet
+  //web.xml配置
+  <servlet-mapping>
+      <servlet-name>spitter</servlet-name>
+      <url-pattern>/</url-pattern>
+      <url-pattern>*.service</url-pattern>
+  </servlet-mapping>
+  //实现WebApplicationInitializer配置
+  ServletRegistration.Dynamic dispatcher = container.addServlet("appServlet",new DispatcherServlet(dispatcherServletContext));
+  dispatcher.setLoadOnStartup(1);
+  dispatcher.addMapping("/");
+  dispatcher.addMapping("*.service");
+  //扩展AbstractDispatcherServletInitializer|AbstractAnnotationConfigDispatcherServletInitializer配置
+  @Override
+  protected String[] getServletMappings(){
+    return new String[]{"/","*.service"};
+  }
+  ```
+  ```
+  //配置URL处理器，将请求转发至相应服务
+  @Bean
+  public HandlerMapping hessianServiceHandlerMapping(){
+    SimmpleUrlHandlerMapping mapping = new SimmpleUrlHandlerMapping();
+    Properties mappings = new Properties();
+    mappings.setProperty("/spitter.service","spitterServiceExporter");
+    mapping.setMappings(mappings);
+    return mapping;
+  }
+  ```
+* 客户端访问Hessian服务
+  * 原理：
+
+  [![客户端访问Hessian-Burlap服务.png](https://i.loli.net/2018/05/20/5b0129516c075.png)](https://i.loli.net/2018/05/20/5b0129516c075.png)
+
+  * 配置：
+  ```
+  //配置Hessian服务代理
+  @Bean
+  public HessianProxyFactoryBean spitterService(){
+    HessianProxyFactoryBean hessianProxy = new HessianProxyFactoryBean();
+    hessianProxy.setServiceUrl("http://localhost:8080/Spitter/spitter.service");
+    hessianProxy.setServiceInterface(SpitterService.class);
+    return hessianProxy;
+  }
+  ```
+* 服务端发布Burlap服务
+  * 原理：与上述服务端发布Hessian服务原理一致
+  * 配置：除服务导出器之外，其他配置与上述服务端发布Hessian服务配置一致
+  ```
+  //配置Burlap服务导出器
+  @Bean
+  public BurlapServiceExporter spitterServiceExporter(SpitterService spitterService){
+    BurlapServiceExporter burlapServiceExporter = new BurlapServiceExporter();
+    burlapServiceExporter.setService(spitterService);
+    burlapServiceExporter.setServiceInterface(SpitterService.class);
+    return burlapServiceExporter;
+  }
+  ```
+* 客户端访问Burlap服务
+  * 原理：与上述客户端访问Hessian服务原理一致
+  * 配置：除服务导出器之外，其他配置与上述客户端访问Hessian服务配置一致
+  ```
+  //配置Burlap服务代理
+  @Bean
+  public BurlapProxyFactoryBean spitterService(){
+    BurlapProxyFactoryBean burlapProxy = new BurlapProxyFactoryBean();
+    burlapProxy.setServiceUrl("http://localhost:8080/Spitter/spitter.service");
+    burlapProxy.setServiceInterface(SpitterService.class);
+    return burlapProxy;
+  }
+  ```
+  
 #### 发布和访问Spring HttpInvoker服务
 
 #### 发布和访问Web服务
