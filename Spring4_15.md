@@ -140,7 +140,7 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
   ```
 * 客户端访问Burlap服务
   * 原理：与上述客户端访问Hessian服务原理一致
-  * 配置：除服务导出器之外，其他配置与上述客户端访问Hessian服务配置一致
+  * 配置：
   ```
   //配置Burlap服务代理
   @Bean
@@ -151,7 +151,32 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
     return burlapProxy;
   }
   ```
-  
+
 #### 发布和访问Spring HttpInvoker服务
+* 服务端发布HttpInvoker服务
+  * 原理：与上述服务端发布Hessian服务原理一致
+  * 配置：除服务导出器之外，其他配置与上述服务端发布Hessian服务配置一致
+  ```
+  //配置HttpInvoker服务导出器
+  @Bean
+  public HttpInvokerServiceExporter spitterServiceExporter(SpitterService spitterService){
+    HttpInvokerServiceExporter httpInvokerServiceExporter = new HttpInvokerServiceExporter();
+    httpInvokerServiceExporter.setService(spitterService);
+    httpInvokerServiceExporter.setServiceInterface(SpitterService.class);
+    return httpInvokerServiceExporter;
+  }
+  ```
+* 客户端访问HttpInvoker服务
+  * 原理：与上述客户端访问Hessian服务原理一致
+  ```
+  //配置HttpInvoker服务代理
+  @Bean
+  public HttpInvokerProxyFactoryBean spitterService(){
+    HttpInvokerProxyFactoryBean httpInvokerProxy = new HttpInvokerProxyFactoryBean();
+    httpInvokerProxy.setServiceUrl("http://localhost:8080/Spitter/spitter.service");
+    httpInvokerProxy.setServiceInterface(SpitterService.class);
+    return httpInvokerProxy;
+  }
+  ```
 
 #### 发布和访问Web服务
