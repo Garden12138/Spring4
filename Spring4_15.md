@@ -19,8 +19,49 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
 
   [![Spring将管理的Bean发布为远程服务.png](https://i.loli.net/2018/05/19/5afff21d696e1.png)](https://i.loli.net/2018/05/19/5afff21d696e1.png)
 
-#### 发布和访问RMI服务
+#### 发布和访问RMI服务（Spring配置）
+* 服务端发布RMI服务
+  * 原理：
 
+  [![服务端发布RMI服务.png](https://i.loli.net/2018/05/19/5b001c23e9083.png)](https://i.loli.net/2018/05/19/5b001c23e9083.png)
+
+  * 配置：
+  ```
+  //配置RMI服务导出器
+  @Bean
+  public RmiServiceExporter rmiServiceExporter(SpitterService spitterService){
+    RmiServiceExporter rmiServiceExporter = new RmiServiceExporter();
+    rmiServiceExporter.setService(spitterService);/*注入具体服务Bean*/
+    rmiServiceExporter.setServiceName("SpitterService");/*设置服务名称*/
+    rmiServiceExporter.setServiceInterface(SpitterService.class);/*设置服务接口*/
+    rmiServiceExporter.setRegistryHost("rmi.spitter.com");/*设置服务注册表Host*/
+    rmiServiceExporter.setRegistryPort("1199");/*设置服务注册表端口号*/
+    return rmiServiceExporter;
+  }
+  ```
+
+* 客户端访问RMI服务
+  * 原理：
+
+  [![客户端访问RMI服务.png](https://i.loli.net/2018/05/20/5b010af711206.png)](https://i.loli.net/2018/05/20/5b010af711206.png)
+
+  * 配置:
+  ```
+  //配置RMI服务代理
+  @Bean
+  public RmiProxyFactoryBean spitterService(){
+    RmiProxyFactoryBean rmiProxy = new RmiProxyFactoryBean();
+    rmiProxy.setServiceUrl("rmi://localhost/SpitterService");/*设置服务URL*/
+    rmiProxy.setServiceInterface(SpitterService.class);/*设置服务接口（与服务端一致）*/
+    return rmiProxy;
+  }
+  ```
+  ```
+  //注入服务
+  @Autowired
+  private SpitterService SpitterService;
+  ```
+  
 #### 发布和访问Hessian和Burlap服务
 
 #### 发布和访问Spring HttpInvoker服务
