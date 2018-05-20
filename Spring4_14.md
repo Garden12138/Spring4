@@ -118,5 +118,5 @@
     @PreFilter("hasPermission(targetObject, 'delete')")
     public void deleteSpittles(List<Spittle> spittles) {
       //...
-    }
+  }
     ```
