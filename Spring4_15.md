@@ -168,6 +168,7 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
   ```
 * 客户端访问HttpInvoker服务
   * 原理：与上述客户端访问Hessian服务原理一致
+  * 配置：
   ```
   //配置HttpInvoker服务代理
   @Bean
@@ -180,3 +181,54 @@ JAX-RPC|JAX-WS     发布/访问平台独立的，基于SOAP的WEB服务
   ```
 
 #### 发布和访问Web服务
+* 服务端发布Web服务
+  * 原理：由服务导出器发布服务，使用注解声明JAX-WS端点（注入了服务接口的类）
+  * 配置：
+  ```
+  //配置JAX-WS服务导出器
+  @Bean
+  public SimpleJaxWsServiceExporter spitterServiceExporter(SpitterService spitterService){
+    SimpleJaxWsServiceExporter simpleJaxWsServiceExporter = new SimpleJaxWsServiceExporter();
+    simpleJaxWsServiceExporter.setBaseAddress("http://localhost:8888/services/");
+    return simpleJaxWsServiceExporter;
+  }
+  ```
+  ```
+  //配置JAX-WS端点
+  @Component
+  @WebService(serviceName="SpitterService")
+  public clas SpitterServiceEndpoint{
+    @Autowired
+    private SpitterService spitterService;/*自动装配SpitterService*/
+    @WebMethod
+    public void addSpittle(Spittle spittle){
+      spitterService.saveSpittle(spittle);/*委托给SpitterService*/
+    }
+  }
+  ```
+* 客户端访问Web服务
+  * 原理：与上述客户端访问Hessian服务原理一致
+  * 配置：
+  ```
+  //配置Web服务代理
+  @Bean
+  public JaxWsProxyFactoryBean spitterService(){
+    JaxWsProxyFactoryBean JaxWsProxy = new JaxWsProxyFactoryBean();
+    JaxWsProxy.setWsdlDocument("http://localhost:8080/services/SpitterService.wsdl");/*标识远程Web服务定义文件位置*/
+    JaxWsProxy.setServiceName("SpitterService");/*标识远程Web服务定义文件的指定服务名称*/
+    JaxWsProxy.setPortName("SpitterServiceHttpPort");/*标识远程Web服务定义文件的指定端口名称*/
+    JaxWsProxy.setServiceInterface(SpitterService.class);
+    JaxWsProxy.setNamespaceUri("http://spitter.com");/*标识远程Web服务定义文件的指定命名空间*/
+    return JaxWsProxy;
+  }
+  ```
+  ```
+  <!-- 远程Web服务定义文件wsdl -->
+  <wsdl:definitions targetNamespace="http://spitter.com">
+  ...
+      <wsdl:service name="SpitterService">
+           <wsdl:port name="SpitterServiceHttpPort" binding="tns:spitterServiceHttpBinding">
+           ...
+      </wsdl:service>
+  </wsdl:definitions>
+  ```
